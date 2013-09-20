@@ -1,4 +1,4 @@
-cd D:\nodejs\KLab
+cd D:\nodejs\HLab
 D:
-D:\nodejs\node.exe server.js
+D:\nodejs\node.exe FrameServer.js serverFile=UartServer.js
 pause
