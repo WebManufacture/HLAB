@@ -36,7 +36,7 @@ global.ContextChannelsClient = {
 		if (Channels.exists(path)){
 			Channels.on(path, handler);
 			response.setHeader("Content-Type", "application/json; charset=utf-8");		
-			context.break = true;
+			context.abort();
 			return false;
 		}
 		else{
