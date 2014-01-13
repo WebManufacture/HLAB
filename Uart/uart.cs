@@ -29,38 +29,33 @@ public class Startup
                 {
                     return Task.Run<object>(() => { return device.Send((byte[])input["data"]); });
                 }
-				if (action == "write-sized")
+                if (action == "write-sized")
                 {
-                    return Task.Run<object>(() => { return device.Send((byte[])input["data"], 1, false); });
+                    var data = (byte[])input["data"];
+                    string log = "Sending: " + data.Length + " L - ";
+                    for (var i = 0; i < data.Length; i++)
+                    {
+                        log += data[i] + " ";
+                    }
+                    Console.WriteLine(log);
+                    return Task.Run<object>(() => { return device.Send(data, 1, false); });
                 }
                 if (action == "command")
                 {
-                    var obj = new MotorCommand();
-					if (input.ContainsKey("line"))
-                    {
-                        obj.Line = Convert.ToInt32(input["line"]);
-                    }
+                    var obj = new UartCommand();
                     if (input.ContainsKey("command"))
                     {
                         obj.Command = Convert.ToByte(input["command"]);
                     }
-                    if (input.ContainsKey("speed"))
+                    if (input.ContainsKey("address"))
                     {
-                        obj.Speed = Convert.ToUInt16(input["speed"]);
+                        obj.Address = Convert.ToByte(input["address"]);
                     }
-                    if (input.ContainsKey("x"))
+                    if (input.ContainsKey("data"))
                     {
-                        obj.X = Convert.ToInt32(input["x"]);
+                        obj.Data = (byte[])input["data"];
                     }
-                    if (input.ContainsKey("y"))
-                    {
-                        obj.Y = Convert.ToInt32(input["y"]);
-                    }
-                    if (input.ContainsKey("z"))
-                    {
-                        obj.Z = Convert.ToInt32(input["z"]);
-                    }
-                    return  Task.Run<object>(() => { return device.Send(obj); });
+                    return Task.Run<object>(() => { return device.Send(obj); });
                 }
                 if (action == "close")
                 {
@@ -68,16 +63,19 @@ public class Startup
                 }
                 if (action == "read")
                 {
-                    return Task.Run<object>(() => { 
-						try{
-							var result = device.Read();
-							return result;
-						}
-						catch(Exception err){
-							//return err.StackTrace;
-							throw err;
-						}
-					});
+                    return Task.Run<object>(() =>
+                    {
+                        try
+                        {
+                            var result = device.Read();
+                            return result;
+                        }
+                        catch (Exception err)
+                        {
+                            //return err.StackTrace;
+                            throw err;
+                        }
+                    });
                 }
                 if (action == "state")
                 {
@@ -98,13 +96,18 @@ public class Startup
         int speed = 38400;
         int timeout = 1000;
         string port = "COM1";
+        string parity = "none";
         if (characters.ContainsKey("speed"))
         {
-            speed = (int)characters["speed"];
+            speed = Convert.ToInt32(characters["speed"]);
+        }
+        if (characters.ContainsKey("parity"))
+        {
+            parity = characters["parity"] + "";
         }
         if (characters.ContainsKey("timeout"))
         {
-            timeout = (int)characters["timeout"];
+            timeout = Convert.ToInt32(characters["timeout"]);
         }
         if (characters.ContainsKey("port"))
         {
@@ -112,7 +115,7 @@ public class Startup
         }
         try
         {
-            device = new Device(port, speed, timeout);
+            device = new Device(port, speed, timeout, parity);
         }
         catch (Exception)
         {
@@ -121,32 +124,6 @@ public class Startup
 
         return true;
     }
-}
-
-public class MotorCommand
-{
-    public byte Command;
-    public int Line;
-    public int X;
-    public int Y;
-    public int Z;
-    public ushort Speed;
-}
-
-public class MotorState
-{
-    public byte command;
-    public int x;
-    public int y;
-    public int z;
-    public int xLimit;
-    public int yLimit;
-    public int zLimit;
-    public byte state;
-    public byte stateA;
-    public byte stateB;
-    public string date;
-    public int line;
 }
 
 public enum ASCII : byte
@@ -184,6 +161,25 @@ public enum ASCII : byte
     RS = 0x1E,//Record Separator= разделитель записей.
     US = 0x1F,//Unit Separator= разделитель юнитов. То есть поддерживалось 4 уровня структуризации данных: сообщение могло состоять из файлов= файлы из групп= группы из записей= записи из юнитов.
     DEL = 0x7F,//Delete= стереть последний символ. Символом DEL= состоящим в двоичном коде из всех единиц= можно было забить любой символ. Устройства и программы игнорировали DEL так же= как NUL. Код этого символа происходит из первых текстовых процессоров с памятью на перфоленте: в них удаление символа происходило забиванием его кода дырочками (обозначавшими логические единицы).
+}
+
+public class UartCommand
+{
+    public string date;
+    public byte Address;
+    public byte Command;
+    public byte[] Data;
+}
+
+
+public class UartError
+{
+    public string error;
+
+    public UartError(string message)
+    {
+        error = message;
+    }
 }
 
 public enum EDeviceState
@@ -252,25 +248,30 @@ public class Device
 
     }
 
-	public Device(string portName, int speed, int timeout) : this(portName, speed, 1000, null)
-	{
-	
-	}
+    public Device(string portName, int speed, int timeout)
+        : this(portName, speed, 1000, null)
+    {
+
+    }
 
     public Device(string portName, int speed, int timeout, string parity)
     {
-		PortName = portName;
-		if (parity != null){
-			if (parity == "odd"){
-			   device = new SerialPort(portName, speed, Parity.Odd, 8, StopBits.One);
-			}
-			if (parity == "even"){
-			   device = new SerialPort(portName, speed, Parity.Even, 8, StopBits.One);
-			}
-		}
-		else{
-			device = new SerialPort(portName, speed, Parity.None, 8, StopBits.One);
-		}
+        PortName = portName;
+        if (parity == "odd" || parity == "even")
+        {
+            if (parity == "odd")
+            {
+                device = new SerialPort(portName, speed, Parity.Odd, 8, StopBits.One);
+            }
+            if (parity == "even")
+            {
+                device = new SerialPort(portName, speed, Parity.Even, 8, StopBits.One);
+            }
+        }
+        else
+        {
+            device = new SerialPort(portName, speed, Parity.None, 8, StopBits.One);
+        }
         if (device.IsOpen)
         {
             State = EDeviceState.Busy;
@@ -309,16 +310,16 @@ public class Device
 
     public string Close()
     {
-		if (device == null) return "";
+        if (device == null) return "";
         if (device.IsOpen)
         {
             device.Close();
             State = EDeviceState.Offline;
         }
-		return PortName;
+        return PortName;
     }
 
-    public MotorState Read()
+    public object Read()
     {
         if (readState != UARTReadingState.free) return null;
         var readTimeout = device.ReadTimeout / 100;
@@ -337,11 +338,13 @@ public class Device
             if (readState == UARTReadingState.free && b == 01)
             {
                 readState = UARTReadingState.reading;
-                continue;
-            }
-            if (readState == UARTReadingState.reading)
-            {
-                receivedBuf = new byte[b];
+                int size = device.ReadByte();
+                if (size <= 0)
+                {
+                    readState = UARTReadingState.free;
+                    continue;
+                }
+                receivedBuf = new byte[size];
                 readingIndex = 0;
                 readState = UARTReadingState.readingSized;
                 continue;
@@ -352,19 +355,16 @@ public class Device
                 {
                     if (b == 4)
                     {
-                        var bytes = new byte[receivedBuf.Length / 2];
-                        for (int i = 0; i < bytes.Length; i++)
-                        {
-                            bytes[i] = (byte)((receivedBuf[i * 2] & (byte)0x0F) * 16 + (receivedBuf[i * 2 + 1] & (byte)0x0F));
-                        }
                         readState = UARTReadingState.free;
-                        return ConvertData(bytes);
+                        Console.WriteLine("Received " + receivedBuf.Length);
+                        return ConvertData(receivedBuf);
                     }
                     else
                     {
                         State = EDeviceState.Error;
                         readState = UARTReadingState.error;
-                        return null;
+                        Console.WriteLine("error! UART Size declared - " + receivedBuf.Length + " but receive byte " + b + " instead EOT(4)");
+                        return "error";
                     }
                 }
                 else
@@ -375,48 +375,48 @@ public class Device
             }
         }
         readState = UARTReadingState.free;
-        return null;
+        return "free";
     }
 
-	public bool Send(byte[] buffer)
-        {
-            return Send(buffer, 0, false);
-        }
+    public bool Send(byte[] buffer)
+    {
+        return Send(buffer, 0, false);
+    }
 
     public bool Send(byte[] buffer, byte sizeByteLength, bool useCRC)
     {
-            if (writeState > UARTWritingState.free) return false;
-            if (buffer.Length > 255 || buffer.Length == 0) return false;
-            if (!device.IsOpen)
+        if (writeState > UARTWritingState.free) return false;
+        if (buffer.Length > 255 || buffer.Length == 0) return false;
+        if (!device.IsOpen)
+        {
+            return false;
+        }
+        writeState = UARTWritingState.writing;
+        var bufAddLen = 2;
+        bufAddLen += sizeByteLength;
+        if (useCRC) bufAddLen += 1;
+        var buf = new byte[buffer.Length + bufAddLen];
+        buf[0] = sizeByteLength > 0 ? (byte)ASCII.SOH : (byte)ASCII.STX;
+        if (sizeByteLength > 0)
+        {
+            buf[sizeByteLength] = (byte)buffer.Length;
+        }
+        buffer.CopyTo(buf, 1 + sizeByteLength);
+        if (useCRC)
+        {
+            byte crc = 255;
+            for (int i = 0; i < buffer.Length; i++)
             {
-                return false;
+                crc ^= buffer[i];
             }
-            writeState = UARTWritingState.writing;
-            var bufAddLen = 2;
-            bufAddLen += sizeByteLength;
-            if (useCRC) bufAddLen += 1;
-            var buf = new byte[buffer.Length + bufAddLen];
-            buf[0] = sizeByteLength > 0 ? (byte)ASCII.SOH : (byte)ASCII.STX;
-            if (sizeByteLength > 0)
-            {
-                buf[sizeByteLength] = (byte)buffer.Length;
-            }
-            buffer.CopyTo(buf, 1 + sizeByteLength);
-            if (useCRC)
-            {
-                byte crc = 255;
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    crc ^= buffer[i];
-                }
-                buf[buf.Length - 2] = crc;
-            }
-            buf[buf.Length - 1] = (byte)ASCII.EOT;
-            uint bwrite = 0;
-            device.Write(buf, 0, buf.Length);
-            writeState = UARTWritingState.free;
-            return true;
-	}
+            buf[buf.Length - 2] = crc;
+        }
+        buf[buf.Length - 1] = (byte)ASCII.EOT;
+        uint bwrite = 0;
+        device.Write(buf, 0, buf.Length);
+        writeState = UARTWritingState.free;
+        return true;
+    }
 
     public bool Send(byte command)
     {
@@ -442,43 +442,40 @@ public class Device
         return value;
     }
 
-    public MotorState ConvertData(byte[] data)
+    public UartCommand ConvertData(byte[] data)
     {
         if (data == null) return null;
-        if (data.Length >= 32)
+        if (data.Length >= 6)
         {
-            MotorState obj = new MotorState();
+            UartCommand obj = new UartCommand();
             obj.date = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.") + DateTime.Now.Millisecond;
-            obj.command = data[0];
-            obj.state = data[1];
-            obj.line = loadInt(data, 2);
-            obj.x = loadInt(data, 6);
-            obj.y = loadInt(data, 10);
-            obj.z = loadInt(data, 14);
-            obj.xLimit = loadInt(data, 18);
-            obj.yLimit = loadInt(data, 22);
-            obj.zLimit = loadInt(data, 26);
-            obj.stateA = data[30];
-            obj.stateB = data[31];
+            obj.Address = data[0];
+            obj.Command = data[1];
+            obj.Data = new byte[data.Length - 2];
+            Array.Copy(data, 2, obj.Data, 0, data.Length - 2);
             return obj;
         }
         return null;
     }
 
-    public bool Send(MotorCommand data)
+    public bool Send(UartCommand data)
     {
         if (data == null)
         {
             return false;
         }
-        byte[] bytes = new byte[20];
-        bytes[0] = (byte)data.Command;
-        bytes[1] = (byte)(data.Speed / 256);
-        bytes[2] = (byte)(data.Speed % 256);
-        saveInt(bytes, 3, data.Line);
-        saveInt(bytes, 7, data.X);
-        saveInt(bytes, 11, data.Y);
-        saveInt(bytes, 15, data.Z);
+        var addLength = 0;
+        if (data.Data != null)
+        {
+            addLength = data.Data.Length;
+        }
+        byte[] bytes = new byte[addLength + 2];
+        bytes[0] = (byte)data.Address;
+        bytes[1] = (byte)(data.Command);
+        if (addLength > 0)
+        {
+            data.Data.CopyTo(bytes, 2);
+        }
         Send(bytes);
         return true;
     }
