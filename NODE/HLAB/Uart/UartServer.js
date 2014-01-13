@@ -4,10 +4,10 @@ var fs = require('fs');
 var paths = require('path');
 var edge = require('edge');
 
-require(paths.resolve("./Modules/Node/Utils.js"));
-require(paths.resolve("./Modules/Channels.js"));
-require(paths.resolve('./Modules/Node/Logger.js'));
-require(paths.resolve('Uart/Uart.js'));
+require(paths.resolve("./ILAB/Modules/Node/Utils.js"));
+require(paths.resolve("./ILAB/Modules/Channels.js"));
+require(paths.resolve('./ILAB/Modules/Node/Logger.js'));
+require(paths.resolve('./HLAB/Uart/Uart.js'));
 
 UartServer = {};
 
@@ -89,7 +89,7 @@ UartServer.Process = {
 			return;
 		}
 		console.log("Emmiting: "  + data);
-		Channels.emit("/" + port + ".send", data);		
+		Channels.emit("/" + port + ".send", JSON.parse(data));		
 		res.finish(200);
 	},
 	

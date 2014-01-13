@@ -1,11 +1,11 @@
 var edge = require('edge');
 var path = require('path');
-require(path.resolve("./Modules/Node/Utils.js"));
-require(path.resolve("./Modules/Channels.js"));
-require(path.resolve('./Modules/Node/Logger.js'));
+require(path.resolve("./ILAB/Modules/Node/Utils.js"));
+require(path.resolve("./ILAB/Modules/Channels.js"));
+require(path.resolve('./ILAB/Modules/Node/Logger.js'));
 
 var uartFunc = edge.func({
-	source: "Uart/Uart.cs",
+	source: "./HLAB/Uart/Uart.cs",
 	references: [ ]
 });
 	
@@ -21,8 +21,7 @@ Uart.List = function(callback){
 	uartFunc({action : 'list'}, function(err, result){
 		callback(result);
 	}); 
-};
-	
+};	
 
 global.Uart.prototype = {	
 	Open : function(speed, timeout, parity){
@@ -44,7 +43,7 @@ global.Uart.prototype = {
 				uart.error = err;
 			}
 			if (result){
-				console.log(uart.port + " Opened!");
+				console.log(uart.port + " Opened! " + speed + " " + parity);
 				Channels.emit("/" + uart.port + ".opened");
 				uart.opened = true;
 				process.on("exit", function(){
@@ -56,25 +55,25 @@ global.Uart.prototype = {
 				uart.opened = false;
 			}
 		});
-		process.on("exit", function(){
-			//uart.Close();
-		});
 	},
 	
 	Write : function(data, callback){
 		if (!this.opened) return;
 		if (!data.length) return;
+		var buf = new Buffer(data.length);
 		for (var i = 0; i < data.length; i++){
-			if (typeof data[i] == 'number') continue;
 			if (typeof data[i] == 'string'){
-				data[i] = data[i].charCodeAt(0);
-				continue;
+				data[i] = parseInt(data[i]);
 			}			
-			break;
+			buf[i] = data[i];
 		}
-		console.log("Sending " + data);
-		uartFunc({action : 'write-sized', data : data}, function(err, result){
-			data.sended = true;	
+		var res = uartFunc({action : 'write-sized', data : buf}, function(err, result){
+			if (err){
+				console.log(err);
+			}
+			else{
+				data.sended = true;	
+			}
 		}); 
 		//Uart.waitResponse(data.command);
 	},
@@ -86,13 +85,13 @@ global.Uart.prototype = {
 		var readFunc = function(){
 			if (!uart.opened) return;
 			uartFunc({action: "read"}, function(err, result){
-				if (err){
-					//log(err);
+				if (err || result == "error"){
 					console.log(err);
 					setTimeout(readFunc, 1000);
 					return;
 				}
-				if (result && result.command){
+				if (result && typeof result == 'object'){
+					console.log("Emmiting: "  + result);
 					Channels.emit(port + ".received", result);
 				}
 				setTimeout(readFunc, 200);
