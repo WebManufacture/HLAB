@@ -1,13 +1,61 @@
-function MotorState() {
-    this.command = 0;
-    this.x = null;
-    this.y = null;
-    this.z = null;
-    this.xLimit = null;
-    this.yLimit = null;
-    this.zLimit = null;
-    this.state = 0;
-    this.line = 0;
+
+function loadInt(arr, index)
+{
+	return (int)(arr[index] * 16777216 + arr[index + 1] * 65536 + arr[index + 2] * 256 + arr[index + 3]);
+}
+
+function saveInt(arr, index, value)
+{
+	arr[index] = (byte)(value >> 24);
+	arr[index + 1] = (byte)(value >> 16);
+	arr[index + 2] = (byte)(value >> 8);
+	arr[index + 3] = (byte)(value);
+	return value;
+}
+
+MotorPacket = function(command, address){
+	if (address == undefined) address = 0;
+	this.address = address;
+	this.command = command;
+	this.line = 0;
+	this.x = 0;
+	this.y = 0;
+	this.z = 0;
+	this.speed = 0;
+}
+
+
+MotorPacket.FromBuffer = function(data){
+	if (data == null) return null;
+	if (data.Length >= 32)
+	{
+		var obj = new MotorPacket(data[0]);
+		obj.date = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.") + DateTime.Now.Millisecond;
+		obj.state = data[1];
+		obj.line = loadInt(data, 2);
+		obj.x = loadInt(data, 6);
+		obj.y = loadInt(data, 10);
+		obj.z = loadInt(data, 14);
+		obj.xLimit = loadInt(data, 18);
+		obj.yLimit = loadInt(data, 22);
+		obj.zLimit = loadInt(data, 26);
+		obj.stateA = data[30];
+		obj.stateB = data[31];
+		return obj;
+	}
+	return null;
+}
+
+MotorPacket.prototype.serialize = function(){
+	var bytes = [];
+	bytes[0] = this.command;
+	bytes[1] = (this.speed / 256);
+	bytes[2] = (this.speed % 256);
+	saveInt(bytes, 3, this.line);
+	saveInt(bytes, 7, this.x);
+	saveInt(bytes, 11, this.y);
+	saveInt(bytes, 15, this.z);
+	return bytes;
 }
 
 global.Commands = global.CommandType =
@@ -35,9 +83,8 @@ CncProgramState =
     Aborted: 4
 }
 
-CncProgram = function (commands, uart) {
+CncProgram = function (commands) {
     this.CurrentLine = 0;
-    this.uart = uart;
     this.Commands = commands;
     this._state = CncProgramState.NotStarted;
 	program = this;
