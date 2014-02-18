@@ -10,7 +10,8 @@ require(Path.resolve('./ILAB/Modules/Node/Logger.js'));
 var fileSystem = require(Path.resolve('./ILAB/Modules/Node/Files.js'));
 require(Path.resolve('./ILAB/Modules/Node/Mongo.js'));
 //var UartUsb = require(Path.resolve('./HLAB/Modules/Uart.js'));
-require(Path.resolve('./HLAB/Modules/UartTcp.js'));
+//require(Path.resolve('./HLAB/Modules/UartTcp.js'));
+require(Path.resolve('./HLAB/Modules/UartUsb.js'));
 
 Server = server = {};
 
