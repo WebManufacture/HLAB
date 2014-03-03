@@ -25,6 +25,12 @@ CNC.Init = function (settings) {
 	CNC.State.AttrInnerProperty("Prog", "#progCommand");
 	CNC.State.AttrInnerProperty("Line", "#progLine");
 	WS.Body.AttrProperty("state");
+	CNC.State.X = 0;
+	CNC.State.Y = 0;
+	CNC.State.Z = 0;
+	lx = 0;
+	ly = 0;
+	lz = 0;
 	CNC.ProgramRunned = false;
 	CNC.DebugMode = false;
 	CNC.ProgramCode;
@@ -96,9 +102,7 @@ CNC.GetProgram = function () {
 
 
 CNC.GetCncState = function () {
-	Net.get(CNC.Settings.StateUrl, function (result) {
-		portState.textContent = result + "";
-	});
+	Net.add(CNC.Settings.CommandUrl + "?type=single&rnd=" + Math.random(), JSON.stringify({command: 4}), function(){});
 };
 
 CNC.StateReturned = function (type, message) {

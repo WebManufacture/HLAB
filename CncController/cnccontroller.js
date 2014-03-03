@@ -4,14 +4,14 @@ var Path = require('path');
 ObjectID = require('mongodb').ObjectID;
 var edge = require('edge');
 
-require(Path.resolve("./ILAB/Modules/Node/Utils.js"));
+require(Path.resolve("./ILAB/Modules/Utils.js"));
 require(Path.resolve("./ILAB/Modules/Channels.js"));
-require(Path.resolve('./ILAB/Modules/Node/Logger.js'));
-var fileSystem = require(Path.resolve('./ILAB/Modules/Node/Files.js'));
-require(Path.resolve('./ILAB/Modules/Node/Mongo.js'));
+require(Path.resolve('./ILAB/Modules/Logger.js'));
+var fileSystem = require(Path.resolve('./ILAB/Modules/Files.js'));
+require(Path.resolve('./ILAB/Modules/Mongo.js'));
 //var UartUsb = require(Path.resolve('./HLAB/Modules/Uart.js'));
-//require(Path.resolve('./HLAB/Modules/UartTcp.js'));
-require(Path.resolve('./HLAB/Modules/UartUsb.js'));
+require(Path.resolve('./HLAB/Modules/UartTcp.js'));
+//require(Path.resolve('./HLAB/Modules/UartUsb.js'));
 
 Server = server = {};
 

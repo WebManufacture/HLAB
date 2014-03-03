@@ -4,9 +4,9 @@ var fs = require('fs');
 var paths = require('path');
 var edge = require('edge');
 
-require(paths.resolve("./ILAB/Modules/Node/Utils.js"));
+require(paths.resolve("./ILAB/Modules/Utils.js"));
 require(paths.resolve("./ILAB/Modules/Channels.js"));
-require(paths.resolve('./ILAB/Modules/Node/Logger.js'));
+require(paths.resolve('./ILAB/Modules/Logger.js'));
 require(paths.resolve('./HLAB/Uart/Uart.js'));
 
 UartServer = {};
