@@ -1,8 +1,8 @@
 var path = require('path');
 var net = require('net');
-require(path.resolve("./ILAB/Modules/Node/Utils.js"));
+require(path.resolve("./ILAB/Modules/Utils.js"));
 require(path.resolve("./ILAB/Modules/Channels.js"));
-require(path.resolve('./ILAB/Modules/Node/Logger.js'));
+require(path.resolve('./ILAB/Modules/Logger.js'));
 	
 global.Uart = function(port, tcpPort){
 	this.port = port;

@@ -1,8 +1,8 @@
 {   
-	"MessagesUrl" : "http://cnc.web-manufacture.net:6670/Uart",
-	"StateUrl":"http://cnc.web-manufacture.net:6670/State",
-	"CommandUrl":"http://web-manufacture.net:6670/Command",
-	"ProgramUrl":"http://web-manufacture.net:6670/Program",
+	"MessagesUrl" : "http://188.127.233.35:6670",
+	"StateUrl":"http://188.127.233.35:6670",
+	"CommandUrl":"http://188.127.233.35:6670",
+	"ProgramUrl":"http://188.127.233.35:6670",
 	"xSpeed" : 7000,
 	"ySpeed" : 9000,
 	"zSpeed" : 9500, 
