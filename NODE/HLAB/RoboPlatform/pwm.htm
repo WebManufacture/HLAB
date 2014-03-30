@@ -33,133 +33,9 @@
 			M.ModulesUrl = "http://modules.web-manufacture.net";
 			M.SystemUrl = "http://system.web-mnanufacture.net";
 
-			CManager = {};
-			
-			CManager._mixin = {
-				InitElem : function(){
-					this.Fill();
-					var hrow = this.get("#row0");
-					hrow.add(".header");
-					var cells = hrow.all(".cell");
-					for (var i = 0; i < cells.length; i++){
-						cells[i].textContent = i + 1;	
-					}
-					var cells = this.all(".cell[col='0']");
-					for (var i = 1; i < cells.length; i++){
-						cells[i].textContent = i;	
-						cells[i].add(".gutter");
-					}
-					this.emit("init");
-				},
-
-				Fill : function(){
-					this.all(".cell").del();
-					for (var i = 0; i < this.Rows + 1; i++){
-						var row = this.CreateRow(i);
-					}
-				},
-
-				CreateRow: function(rnum){
-					var row = this.IDiv.div(".row");
-					row.id = "row" + rnum;
-					for (var i = 0; i < this.Cols + 1; i++){
-						row.add(this._initCell(i, rnum));
-					}
-					return row;
-				},
-
-				_initCell: function(col, row){
-					var cell = DOM.div(".cell", "&nbsp;");
-					cell.id = "cell" + row + "_" + col;
-					cell.set("@col", col);
-					cell.set("@row", row);
-					cell.row = row;
-					cell.col = col;
-					cell.value = 0;
-					var table = this;
-					cell.onclick = function(event){
-						table._onCellClick.call(this, event, table);
-						table.emit("cellClick", this);
-					};		
-					cell.onmouseenter = function(event){
-						table._onCellEnter.call(this, event, table);
-					};		
-					return cell;
-				},
-
-				_onCellClick : function(event, table){
-					if (this.col <= 0){
-						table.emit("gutter_click", this);
-						return;
-					}
-					if (this.row <= 0){
-						table.emit("header_click", this);
-						return;
-					}
-					WS.ToggleClass(this,"selected");	
-					if (this.is(".selected")){
-						table.emit("cell_selected", this);
-					}
-					else{
-						table.emit("cell_unselected", this);
-					}
-				},
-
-
-				_onCellEnter : function(event, table){
-					if (this.col <= 0 || this.row <= 0) return;
-					var hcol = table.get(".row.header .cell[col='" + this.col + "']"); 
-					if (hcol){
-						table.all(".row.header .cell.current").del(".current");	
-						hcol.add(".current");
-					}
-					if (event.buttons == 1){
-						WS.ToggleClass(this, "selected");
-						if (this.is(".selected")){
-							table.emit("cell_selected", this);
-						}
-						else{
-							table.emit("cell_unselected", this);
-						}
-					}
-				},
-			};
-			
-			CManager.Init = function(table, options){
-				Extend(table, Channel.prototype);	
-				Extend(table, CManager._mixin);
-				Channel.prototype.constructor.call(table);
-
-				table.Cols = parseInt(table.get("@columns"));
-				table.Rows = parseInt(table.get("@rows"));
-				table.CellSize = parseInt(table.get("@cellsize"));
-
-				if (options && options.cols){
-					table.Cols = options.cols;
-				}
-				if (options && options.rows){
-					table.Rows = options.rows;
-				}
-				if (options && options.width){
-					table.CellSize = options.width;
-				}
-
-				table.IDiv = table.div(".internal");
-				var isize = ((table.CellSize) * (table.Cols + 1));
-				table.IDiv.set("@style", "width : " + isize + "px;");
-				table.add(".initialized");
-				for (var item in table){
-					if (item.indexOf("on") == 0 && typeof(table[item]) == 'function'){
-						table.on(item.replace("on", '').toLowerCase(), table[item]);
-					}
-				}
-				table.InitElem();
-				return table;
-			};
 
 			WS.DOMload(function(){
-				CManager.Init(MainManager);
-				CManager.Init(ChannelManager);
+
 				/*socket = new WebSocket("ws://localhost:5000");
 				socket.onopen = (function(s){
 					console.log("connected");
@@ -186,10 +62,12 @@
 		</script>
 	</head>
 	<body class="">
+		<include url="http://services.web-manufacture.net/Grids/SimpleGrids.js"></include>
 		<include url='http://services.web-manufacture.net/UI/Toolbars.htm'></include>
 		<include url='http://services.web-manufacture.net/UI/UiUtils.htm'></include>
 		<include url='http://services.web-manufacture.net/UI/Win.htm'></include>
 		<include url='http://services.web-manufacture.net/UI/HtmlElements.htm'></include>
+		<include url="CellsManager.htm"></include>
 
 		<div id="UiSettingsWindow" class='window invisible' title='Настройки'>
 			<div class='current-port'>
@@ -237,11 +115,24 @@
 				</div>
 			</div>
 			
-			<div id="MainManager" class='cells-manager' cellsize='10' rows='10' columns='300'>
+			<div id="CellsManager" class='cells-manager' cellsize='20' rows='10' columns='300'>
 
 			</div>
 			<div id="ChannelManager" class='cells-manager' cellsize='5' rows='32' columns='300'>
 
+			</div>
+			<div id='FilesBrowser' class="invisible">	
+				<div class='toolbar'>
+					<div class='menuitem' icon='https://cdn3.iconfinder.com/data/icons/musthave/32/Add.png' onclick="RoboUI.NewProgram();"></div>
+					<div class='menuitem' icon='https://cdn3.iconfinder.com/data/icons/musthave/32/Save.png' onclick="RoboUI.SaveProgram();"></div>
+				</div>
+				<input type='text' id='FileNameBox' class='hintable-box' />
+				<div id='FilesContainer' class='container'>
+
+				</div>
+			</div>
+			<div id='ProgramArea' class=''>
+				<textarea id='programText' onchange='RoboUI.SaveProgram();'></textarea>	
 			</div>
 		</div>
 	</body>

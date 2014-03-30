@@ -1,0 +1,61 @@
+<div id='DevicesWidgetModule' class='widget-module' for='.device-widget'>
+	<style>
+		.device-widget{
+			width: 200px;
+			height: 55px;
+		}
+		
+		.device-widget[state="offline"]{
+			background-color: #E0E0E0;
+		}
+		
+		.device-widget[state="closed"]{
+			background-color: #FFE0CF;
+		}
+		
+		.device-widget[state="connected"]{
+			background-color: #CFC;
+		}
+		
+		.device-widget .port-name{
+			font-weight: bold;
+			color: navy;
+		}
+	</style>
+	<script>
+		DevicesWidgetExtention = {  
+			init : function(){
+				var self = this;
+				console.log("init")
+				this.set("@state", 'unconfigured');
+				Channels.on("device.config", function(config){
+					self.configure(config);
+				});
+				Channels.on("device.state", function(state){
+					self.setState(state);
+				});
+			},
+			
+			configure: function(config){
+				this.PortName.textContent = config.port;
+				this.PortSpeed.textContent = config.speed;
+			},
+			
+			setState: function(state){
+				if (state){
+					this.set("@state", state);
+				}
+				else{
+					this.set("@state", 'unconfigured');
+				}
+			}
+		};
+	</script>
+	<div class='port-info'>
+		Порт: 
+		<div>
+		<span id="PortName" class='port-name' mapById='^.device-widget'></span>		
+		<span id="PortSpeed" class='port-speed' mapById='^.device-widget'></span>
+			</div>
+	</div>
+</div>
