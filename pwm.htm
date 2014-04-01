@@ -1,37 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>RoboMind control</title>
+		<title>Ferro control</title>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
 		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5?join=true"></script>
-
+		<link type='text/css' rel='stylesheet' href="pwm.css" />
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="http://hlab.web-manufacture.net/Modules/UartClient.js"></script>
-
+		<script src="pwm.js"></script>
 		<style type='text/css'>
-			.line div{
-				display: inline-block;
-				padding-left: 10px;
-			}
-			.color-btn {
-				background-position: center center;
-				background-repeat: no-repeat;
-				border: 1px solid #C0C0C0;
-				border-radius: 10px;
-				cursor: pointer;
-				display: inline-block;
-				font-size: 10px;
-				height: 50px;
-				margin: 2px;
-				position: relative;
-				text-align: center;
-				vertical-align: top;
-				width: 50px;
-			}
-			.color-btn:hover {
-				border: solid 2px red;
-			}
+
 
 		</style>
 		<script type='text/javascript'>
@@ -39,172 +18,6 @@
 			M.ModulesUrl = "http://modules.web-manufacture.net";
 			M.SystemUrl = "http://system.web-mnanufacture.net";
 
-
-			WS.DOMload(function(){
-				//device = new UartManager("ws://el-table:5000", "device");
-				device = new UartManager("ws://localhost:5000", "device");
-				Channels.on("device.mirrored", function(data){
-					DeviceLog.div(".line.info.output", data);
-				});
-				Channels.on("device.received", function(data){
-					var pack = parsePacket(data);
-					if (pack){
-						if (pack.isSettings){
-							var log = DeviceLog.div(".line.device-settings", "Device settings   Divider: ");
-							log.div('.division', pack.division);
-							log.div('', " Counter: ");
-							log.div('.timer', pack.timer);
-						}
-					}
-					else{
-						DeviceLog.div(".line.info.input", data);
-					}
-				});
-			});
-
-			function SettingsData(data){
-				this.isSettings = true;
-				this.command = data[0];
-				this.address = getInt(data, 1);
-				this.division = data[3];				
-				this.low = getLong(data, 4);
-				this.high = getLong(data, 8);
-				this.timer = (this.high << 8) + this.low;
-			}
-
-			function PwmData(data){
-				this.command = data[0];
-				this.address = getInt(data, 1);
-				this.port = data[3];
-				this.low = getLong(data, 4);
-				this.high = getLong(data, 8);
-			}
-
-			function CheckSettings(){
-				Channels.emit("device.send", [01]);
-			};
-
-			function parsePacket(data){
-				if (!data || data.length != 12) return null;
-				if (data[0] == 0 || data[0] == 1)
-				{
-					return new SettingsData(data);
-				}
-				else
-				{
-					return new PwmData(data);
-				}
-			}
-
-			function getInt(data, index){
-				return (data[index] << 8) + data[index+1];	
-			}
-
-			function getLong(data, index){
-				return (data[index] << 24) + (data[index + 1] << 16) + (data[index + 2] << 8) + data[index+3];	
-			}
-
-			function getLowInt(data){
-				return data & 255;	
-			}
-
-			function getHighInt(data, index){
-				return (data >> 8) & 255;
-			}
-
-			function SendInfo(info){
-				if (info && info.length > 0){
-					var data = info.split(' ');
-				}
-			}
-
-			function Send(obj){
-				var arr = [];
-				if (obj){
-					obj.command = parseInt(obj.command);
-					arr.push(obj.command);
-					if (!obj.address) obj.address = 0;
-					obj.address = parseInt(obj.address);
-					arr.push(getHighInt(obj.address));
-					arr.push(getLowInt(obj.address));
-					obj.port = parseInt(obj.port);
-					arr.push(obj.port);
-
-					if (!obj.low) obj.low = 0;
-					obj.low = parseInt(obj.low);
-					arr[4] = (obj.low >> 24) & 255;
-					arr[5] = (obj.low >> 16) & 255;
-					arr[6] = (obj.low >> 8) & 255;
-					arr[7] = (obj.low) & 255;
-
-					if (!obj.high) obj.high = 0;
-					obj.high = parseInt(obj.high);
-					arr[8] = (obj.high >> 24) & 255;
-					arr[9] = (obj.high >> 16) & 255;
-					arr[10] = (obj.high >> 8) & 255;
-					arr[11] = (obj.high) & 255;
-					for (var i = 0; i < arr.length; i++){
-						arr[i] = parseInt(arr[i]);
-						if (isNaN(arr[i])){
-							throw "ERROR VALUE " + arr;
-						}
-					}
-					Channels.emit("device.send", arr);
-					return arr;
-				}
-				return;
-			}
-
-			function onCell_Selected(cell){
-				cell.value = 255;
-				programText.textContent = "Cell: " + cell.row + " " + cell.col + " " + cell.value;
-			}
-
-			function onCell_UnSelected(cell){
-				cell.value = 0;
-				programText.textContent = "Cell: " + cell.row + " " + cell.col + " " + cell.value;
-			}
-
-			function ShowSettings(){
-				Channels.once("device.received", function(data){
-					var settings = parsePacket(data);
-					if (settings && settings.isSettings){
-						dsvDivider.value = settings.division;
-						dsvTimerValue.value = settings.timer;
-						DeviceSettingsWindow.Show();
-					}});
-				CheckSettings();
-			}	
-
-			function SendJSON(value){
-				Send(JSON.parse(value));
-			}	
-
-
-			function SaveSettings(){
-				Send({command : 2, port : dsvDivider.value, low : dsvTimerValue.value});
-				DeviceSettingsWindow.Hide();
-			}	
-
-			function SetPort(port, value1, value2){
-				Send({command : 5, port : port, low : value1, high : value2});
-			}
-
-			function SetPwm(port, value){
-				SetPort(port, 100 - value, value);
-			}
-
-			function SetColor1(r, g, b){
-				SetPwm(17, b);
-				SetPwm(18, r);
-				SetPwm(19, g);
-			}
-
-			function SetColor2(r, g, b){
-				SetPwm(2, b);
-				SetPwm(1, r);
-				SetPwm(0, g);
-			}
 
 		</script>
 	</head>
@@ -235,11 +48,11 @@
 				Save
 			</div>
 		</div>
-		<div class='header-bar'>
+		<div class='header-bar invisible debug-box'>
 			<div id='DeviceWidget' class='device-widget ui-widget'>
 
 			</div>
-			<div id='ControlBar' class='toolbar invisible' style='width:300px; float: left;'>
+			<div id='ControlBar' class='toolbar' style='width:300px; float: left;'>
 				<div class='menuitem resume' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="CNC.ProgCommand('resume');">
 				</div>			
 				<div class='menuitem stop' icon='http://cdn5.iconfinder.com/data/icons/48_px_web_icons/48/Signal_stop.png'	onclick="CNC.Command({command:3});">
@@ -256,31 +69,118 @@
 			</div>
 		</div>
 		<div class='clear'></div>
-		<div id='SendPanel' class='invisible'>
+		<div id='SendPanel' class='invisible debug-box'>
 			<input type='text' style='width:500px' id='DataToSendBox'/>
 			<div class='btn-ira ok' onclick="SendJSON(DataToSendBox.value);">
 				Send
 			</div>
 		</div>
-		<div id='ColorButtons'>
-			<div class='color-btn' style='background-color: #FFFF00;' onclick="SetColor1(50, 50, 0);">
-
+		<div id='FerroControl'>
+			<div class='title'>
+				<h1>
+					Ferro Control
+				</h1>
+				</div>
+			<h2>
+					Motion:
+				</h2>
+			<div id='MotorControlPanel' style="width: 302px; text-align:center;">
+				<div id='mFastLeftBtn' class='motor-btn' onclick="MotorCommand(100, 0, 0);">
+					&lt;&lt;
+				</div>
+				<div  id='mLeftBtn' class='motor-btn' onclick="MotorCommand(50, 20, 0);">
+					←
+				</div>
+				<div  id='mCenterBtn' class='motor-btn' onclick="MotorCommand(0, 50, 0);">
+					↔
+				</div>
+				<div  id='mRightBtn' class='motor-btn' onclick="MotorCommand(0, 20, 50);">
+					→
+				</div>
+				<div  id='mFastRightBtn' class='motor-btn' onclick="MotorCommand(0, 0, 100);">
+					&gt;&gt;
+				</div>
 			</div>
-			<div class='color-btn' style='background-color: #800000;' onclick="SetColor1(50, 00, 0);">
+			<h2>
+					Color:
+				</h2>
+			<div id='ColorButtonsVariant1' class='' style="width: 302px; height: 302px; position: relative;">
+				<div class='markup-help' style='border: 1px solid red; border-radius: 100px; height: 200px; position: absolute; top: 50px; width: 200px; left: 50px;z-index: 1;'>
 
-			</div>
-			<div class='color-btn' style='background-color: green;' onclick="SetColor1(0, 50, 0);">
+				</div>
+				<div class='markup-help' style='border: 1px solid lightgreen; height: 150px; position: absolute; width: 150px;'>
 
-			</div>
-			<div class='color-btn' style='background-color: blue;' onclick="SetColor1(0, 0, 50);">
+				</div>
+				<div class='markup-help' style='border: 1px solid orange; height: 140px; position: absolute; width: 140px; top: 80px; left: 80px;z-index: 1;'>
 
-			</div>
-			<div class='color-btn' onclick="SetColor1();">
+				</div>
+				<div id='cBtnColor1' class='color-btn' onclick='SetColorNum(1);' style='top: 25px; left: 125px;'>
 
-			</div>
+				</div>
+				<div id='cBtnColor2'class='color-btn sub-color-btn' onclick='SetColorNum(2);' style='top: 40px; left: 167px;'>
 
+				</div>
+				<div id='cBtnColor3'class='color-btn' onclick='SetColorNum(3);' style='top: 55px; left: 195px;'>
+
+				</div>
+				<div id='cBtnColor4'class='color-btn sub-color-btn' onclick='SetColorNum(4);' style='top: 93px; left: 220px;'>
+
+				</div>
+				<div id='cBtnColor5'class='color-btn' onclick='SetColorNum(5);' style='top: 125px; left: 225px;'>
+
+				</div>
+				<div id='cBtnColor6'class='color-btn sub-color-btn' onclick='SetColorNum(6);' style='top: 167px; left: 220px;'>
+
+				</div>
+				<div id='cBtnColor7'class='color-btn' onclick='SetColorNum(7);' style='top: 195px; left: 195px;'>
+
+				</div>
+				<div id='cBtnColor8'class='color-btn sub-color-btn' onclick='SetColorNum(8);' style='top: 220px; left: 167px;'>
+
+				</div>
+				<div id='cBtnColor9'class='color-btn' onclick='SetColorNum(9);' style='top: 225px; left: 125px;'>
+
+				</div>
+				<div id='cBtnColor10'class='color-btn sub-color-btn' onclick='SetColorNum(10);' style='top: 220px; left: 93px;'>
+
+				</div>
+				<div id='cBtnColor11'class='color-btn' onclick='SetColorNum(11);' style='top: 195px; left: 55px;'>
+
+				</div>
+				<div id='cBtnColor12'class='color-btn sub-color-btn' onclick='SetColorNum(12);' style='top: 167px; left: 40px;'>
+
+				</div>
+				<div id='cBtnColor13'class='color-btn' onclick='SetColorNum(13);' style='top: 125px; left: 25px'>
+
+				</div>				
+				<div id='cBtnColor14'class='color-btn sub-color-btn' onclick='SetColorNum(10);' style='top: 93px; left: 40px;'>
+
+				</div>
+				<div id='cBtnColor15'class='color-btn' onclick='SetColorNum(11);' style='top: 55px; left: 55px;'>
+
+				</div>
+				<div id='cBtnColor16'class='color-btn sub-color-btn' onclick='SetColorNum(12);' style='top: 40px; left: 93px;'>
+
+				</div>
+				<div id='cBtnColorHide'class='color-btn hide-btn' onclick='SetColor(0,0,0);' style='top: 125px; left: 125px;'>
+					X
+				</div>		
+				<div id='cBtnColorShow1'class='color-btn sub-color-btn central-btn' onclick='StartColorShow(1);' style='top: 130px; left: 80px;'>
+					S
+				</div>				
+				<div id='cBtnColorShow2'class='color-btn sub-color-btn central-btn' onclick='StartColorShow(2);' style='top: 80px; left: 130px;'>
+					S
+				</div>				
+				<div id='cBtnColorShow3'class='color-btn sub-color-btn central-btn' onclick='StartColorShow();' style='top: 180px; left: 130px;'>
+					S
+				</div>				
+				<div id='cBtnColorShow4'class='color-btn sub-color-btn central-btn' onclick='StartColorShow();' style='top: 130px; left: 180px;'>
+					S
+				</div>				
+			</div>	
 		</div>
-		<div id='DeviceLog'>
+
+		<div id='DeviceLog' class='invisible debug-box'>
 
 		</div>
 	</body>

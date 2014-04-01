@@ -1,8 +1,59 @@
 function RoboController2(robo){
+	
 	this.robo = robo;
+	this.mainVector = {};	
 	
 	this.onInterval = function(){
-		robo.goRandom();
+		
+		
+		if (!robo.isFree()){
+			if (robo.Sensor.left) this.mainVector.x = 1;
+			if (robo.Sensor.right) this.mainVector.x = -1;
+			if (robo.Sensor.top) this.mainVector.y = 1;
+			if (robo.Sensor.bottom) this.mainVector.y = -1;
+		}
+
+
+		if (robo.Sensor.top == true){
+			robo.goDown();
+			robo.setText("D");
+ 		}
+		
+		else if (robo.Sensor.right == true){
+			if (robo.X > 450){
+				robo.goUp() ;			
+				robo.setText("R");
+			}
+			else{
+				robo.goDown();			
+				robo.setText("D");
+			}			
+			
+		}
+		
+		else if (robo.Sensor.bottom == true){
+			robo.goUp() ;			
+			robo.setText("U");
+		}
+		else {
+			robo.goRight();			
+			robo.setText("R");
+		}
+
+		
+		
+		if (this.mainVector.x = 5) {
+			
+			robo.goLeft();
+		}
+		
+	
+		
+		
+		
+		
+		
+		
 	}
 }
 
