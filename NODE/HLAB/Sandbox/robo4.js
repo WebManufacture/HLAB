@@ -19,29 +19,33 @@ function RoboController4(robo){
 
 		if (robo.Sensor.top == true){
 			robo.goDown();
-			robo.setText("V");
+			robo.setText("↓");
  		}
 		else if (robo.Sensor.right == true){
 			if (robo.X > 450){
-				robo.goUp();			
-				robo.setText("^");
+				robo.goUp() ;			
+				robo.setText("→");
 			}
 			else{
 				robo.goDown();			
-				robo.setText("V");
+				robo.setText("↓");
 			}			
 			
 		}
 		else if (robo.Sensor.bottom == true){
-			robo.goUp();			
-			robo.setText("^");
+			robo.goUp() ;			
+			robo.setText("↑");
 		}
 		else {
 			robo.goRight();			
-			robo.setText(">");
+			robo.setText("→");
 		}
-
-
+/*
+8592 — ←
+8593 — ↑
+8594 — →
+8595 — ↓
+		
 		//robo.goVector(x, y)
 
 
