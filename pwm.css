@@ -1,3 +1,4 @@
+/*
 html{
 	text-align: center;
 }
@@ -79,4 +80,400 @@ h2{
 
 .markup-help{
 	display: none;
+}
+*/
+
+/* FerroPlayer */
+body {
+	background-image: linear-gradient(#ffffff, #808080);
+	color: white;
+}
+.wrapper {
+    /*border: 1px solid black;*/
+	text-align: center;
+	position: relative;
+	width: 900px;
+    height: 500px;
+    margin: 0;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 1;
+}
+.logo {
+    background: url('images/ferro/logo.png');
+    width: 210px;
+    height: 50px;
+    background-size: cover;
+    position: absolute;
+    z-index: 21;
+    left: 20px;
+    top: 20px;
+
+}
+
+.color_circle{
+    width: 250px;
+    height: 250px;
+    position: relative;
+    border: 1px solid black;
+    border-radius: 165px;
+    top: 50px;
+    left: 300px;
+    z-index: 2;
+}
+.btn_1 {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #FFFFC6;
+    border-radius: 50px;
+    background: #3333FF;
+    position: absolute;
+    top: 20px;
+    left: -40px;
+    z-index: 3;
+}
+.btn_1:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+
+.btn_1:active {
+	border: solid 2px red;
+}
+
+.btn_2 {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #FFFFC6;
+    border-radius: 50px;
+    background: #FF3333;
+    position: absolute;
+    top: 20px;
+    left: 200px;
+    z-index: 4;
+}
+.btn_2:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+
+.btn_2:active {
+	border: solid 2px red;
+}
+
+.btn_3 {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #FFFFC6;
+    border-radius: 50px;
+    background: #00FF00;
+    position: absolute;
+    top: 200px;
+    left: 75px;
+    z-index: 5;
+}
+.btn_3:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+
+.btn_3:active {
+	border: solid 2px red;
+}
+.btn_4 {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #FFFFC6;
+    border-radius: 50px;
+    background: #FF33FF;
+    position: absolute;
+    top: -40px;
+    left: 75px;
+    z-index: 6;
+}
+.btn_4:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_4:active {
+	border: solid 2px red;
+}
+
+.btn_5 {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #FFFFC6;
+    border-radius: 50px;
+    background: #FFFF00;
+    position: absolute;
+    top: 150px;
+    left: 200px;
+    z-index: 7;
+}
+.btn_5:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_5:active {
+	border: solid 2px red;
+}
+.btn_6 {
+     width: 100px;
+     height: 100px;
+     border: 1px solid #FFFFC6;
+     border-radius: 50px;
+     background: #00FFFF;
+     position: absolute;
+     top: 140px;
+     left: -40px;
+     z-index: 8;
+ }
+.btn_6:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_6:active {
+	border: solid 2px red;
+}
+.btn_7 {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #FFFFC6;
+    border-radius: 35px;
+    background: #CC33FF;
+    position: absolute;
+    top: 5px;
+    left: 30px;
+    z-index: 9;
+}
+.btn_7:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_7:active {
+	border: solid 2px red;
+}
+.btn_8 {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #FFFFC6;
+    border-radius: 35px;
+    background: #FF0099;
+    position: absolute;
+    top: 5px;
+    left: 150px;
+    z-index: 10;
+}
+.btn_8:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_8:active {
+	border: solid 2px red;
+}
+.btn_9 {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #FFFFC6;
+    border-radius: 35px;
+    background: #FF9900;
+    position: absolute;
+    top: 100px;
+    left: 210px;
+    z-index: 11;
+}
+.btn_9:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_9:active {
+	border: solid 2px red;
+}
+.btn_10 {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #FFFFC6;
+    border-radius: 35px;
+    background: #CCFF00;
+    position: absolute;
+    top: 190px;
+    left: 155px;
+    z-index: 12;
+}
+.btn_10:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_10:active {
+	border: solid 2px red;
+}
+.btn_11 {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #FFFFC6;
+    border-radius: 35px;
+    background: #00FF99;
+    position: absolute;
+    top: 190px;
+    left: 30px;
+    z-index: 13;
+}
+.btn_11:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_11:active {
+	border: solid 2px red;
+}
+.btn_12 {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #FFFFC6;
+    border-radius: 35px;
+    background: #0099FF;
+    position: absolute;
+    top: 100px;
+    left: -25px;
+    z-index: 14;
+}
+.btn_12:hover {
+	border: solid 2px #FFFFC6;
+	z-index: 50;
+}
+.btn_12:active {
+	border: solid 2px red;
+}
+.button {
+    /*border: 1px solid black;*/
+    width: 900px;
+    height: 100px;
+    margin: 0;
+    top: -117px;
+    position: relative;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 15;
+}
+.prev-prev {
+    background: url('images/ferro/prev-prev.png');
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    position: absolute;
+    z-index: 17;
+    border-radius: 50px;
+    left: 30px;
+}
+.prev-prev:hover {
+	background: url('images/ferro/prev-prev-hover.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.prev-prev:active {
+	background: url('images/ferro/prev-prev-click.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.prev {
+    background: url('images/ferro/prev.png');
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    position: absolute;
+    z-index: 18;
+    border-radius: 50px;
+    left: 150px;
+}
+.prev:hover {
+	background: url('images/ferro/prev-hover.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.prev:active {
+	background: url('images/ferro/prev-click.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.vibro {
+    background: url('images/ferro/vibro.png');
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    position: absolute;
+    z-index: 16;
+    border-radius: 50px;
+    left: 380px;
+}
+.vibro:hover {
+	background: url('images/ferro/vibro-hover.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.vibro:active {
+	background: url('images/ferro/vibro-click.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+
+.next {
+    background: url('images/ferro/next.png');
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    position: absolute;
+    z-index: 19;
+    border-radius: 50px;
+    left: 610px;
+}
+.next:hover {
+	background: url('images/ferro/next-hover.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.next:active {
+	background: url('images/ferro/next-click.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.next-next {
+    background: url('images/ferro/next-next.png');
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    position: absolute;
+    z-index: 20;
+    border-radius: 50px;
+    left: 730px;
+}
+.next-next:hover {
+	background: url('images/ferro/next-next-hover.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
+}
+.next-next:active {
+	background: url('images/ferro/next-next-click.png');
+	width: 100px;
+	height: 100px;
+	background-size: cover;
+	z-index: 50;
 }
