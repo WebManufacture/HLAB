@@ -112,6 +112,17 @@ body {
 
 }
 
+.logo_khs {
+	background: url('images/ferro/logo_khs.png');
+	background-size: cover;
+	position: absolute;
+	z-index: 22;
+	left: 20px;
+	bottom: 20px;
+	width: 120px;
+	height: 20px;
+}
+
 .color_circle{
     width: 250px;
     height: 250px;
@@ -120,7 +131,7 @@ body {
     border-radius: 165px;
     top: 50px;
     left: 300px;
-    z-index: 2;
+    z-index: 102;
 }
 .btn_1 {
     width: 100px;
@@ -476,4 +487,8 @@ body {
 	height: 100px;
 	background-size: cover;
 	z-index: 50;
+}
+
+#FerroLogoBox:hover{
+	margin: 2px;
 }

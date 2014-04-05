@@ -163,9 +163,47 @@ h2{
 					Ferro Control
 				</h1>
 				</div>
-			<h2>
-					Motion:
-				</h2>
+			<div id='VoiceControl'>
+				<input type='text' id='VoiceInput'/>
+				<script type='text/javascript'>
+					WS.DOMload(function(){
+						VoiceInput.focus();
+
+						VoiceInput.onkeyup = function(){
+							var text = VoiceInput.value;
+							switch(text){
+								case 'синий' : {
+									VoiceInput.value = '';
+									SetColor({red:0,green:20, blue: 100}); 
+									break;			
+								}				
+
+								case 'красный' : {
+									VoiceInput.value = '';
+									SetColor({red:100,green:0, blue: 0}); 
+									break;
+								}
+
+								case 'желтый' : {
+									VoiceInput.value = '';
+									SetColor({red:100,green:85, blue: 00});
+									break;
+								}
+
+
+								case 'зеленый' : {
+									VoiceInput.value = '';
+									SetColor({red:50,green:100, blue: 00}); 
+									break;
+								}
+
+							}
+							//;
+							//VoiceInput.focus();
+						};
+					});				
+				</script>
+			</div>
 			<div id='MotorControlPanel' style="width: 302px; text-align:center;">
 				<div id='mFastLeftBtn' class='motor-btn' onclick="MotorCommand(100, 0, 0);">
 					&lt;&lt;
@@ -247,7 +285,7 @@ h2{
 				<div id='cBtnColorHide'class='color-btn hide-btn' onclick='SetColor(0,0,0); return false;' style='top: 125px; left: 125px;'>
 					X
 				</div>		
-				<div id='cBtnColorShow1'class='color-btn sub-color-btn central-btn' onclick='StartColorShow(1); return false;' style='top: 130px; left: 80px;'>
+				<div id='cBtnColorShow1'class='color-btn sub-color-btn central-btn' onclick='StartColorShow(); return false;' style='top: 130px; left: 80px;'>
 					S
 				</div>				
 				<div id='cBtnColorShow2'class='color-btn sub-color-btn central-btn' onclick='StartColorShow(2); return false;' style='top: 80px; left: 130px;'>

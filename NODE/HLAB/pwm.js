@@ -31,7 +31,7 @@ WS.DOMload(function(){
 			if (packageCollector.length > 20) FlushData();
 		}
 	});*/
-	
+
 	Channels.on("device.mirrored", function(data){
 		DeviceLog.div(".line.info.output", data);
 	});
@@ -147,13 +147,38 @@ function SetColor(num){
 	if (typeof(num) == 'object'){
 		var c = num;	
 	}
-    if (c){
+	if (c){
 		Send("SetColor", c)
 	}
 }
 
+function MotorMode1(){
+	SetMotor(0,10);
+}
+
+
+function SetMotorObj(obj){
+	Send("SetMotor", obj);
+}
+
 function SetMotor(i, j){
-	Send("SetMotor", { left : i, right: j})
+	var e = { en: arguments.length > 0, speed: 200, dir: "vibro", amp: 0x202};
+	if (i == j){
+		e.speed = i;
+		e.dir = "vibro";
+		e.amp = 0x1602;
+	}
+	else{
+		if (i < j) {
+			e.speed = j;
+			e.dir = true;
+		}
+		else  {
+			e.speed = i;
+			e.dir = false;
+		}
+	}
+	SetMotorObj(e);
 }
 
 function SetColorNum(num){
@@ -161,28 +186,32 @@ function SetColorNum(num){
 }
 
 function StopColorShow(){
-	Send("StopColorShow", "{}");
+	Send("StopColorShow", {});
 }
 
 function StartColorShow(){
-	Send("StartColorShow", "{}");
+	Send("StartColorShow", {speed: 200});
+	SetMotor(80, 80);
 }
-	
+
 sArr = [
-	{ red : 100, green : 0, blue : 0},     //K
-	{ red : 100, green : 50, blue : 0},   //
-	{ red : 100, green : 75, blue : 0},//О
-	{ red : 100, green : 88, blue : 0},//
-	{ red : 100, green : 100, blue : 0},	//Ж
-	{ red : 80, green : 100, blue : 0},//
-	{ red : 50, green : 100, blue : 0},//З
-	{ red : 0, green : 100, blue : 0},//
-	{ red : 0, green : 100, blue :80},//Г
+	{ red : 0, green : 0, blue : 0},     //K
+	{ red : 90, green : 0, blue : 100},   //
+	{ red : 100, green : 0, blue : 60},//О
+	{ red : 100, green : 0, blue : 0},//
+	
+	{ red : 100, green : 30, blue : 0},	//Ж
+	
+	{ red : 100, green : 70, blue : 0},//
+	{ red : 90, green : 100, blue : 0},//З
+	{ red : 30, green : 100, blue : 0},//
+	{ red : 0, green : 100, blue : 30},//Г
 	{ red : 0, green : 100, blue : 100},//
-	{ red : 0, green : 70, blue : 100},//С
-	{ red : 0, green : 40, blue : 100},//
-	{ red : 0, green : 0, blue : 100},//Ф
+	{ red : 0, green : 50, blue : 100},//С
+	{ red : 0, green : 0, blue : 100},//
+	{ red : 60, green : 0, blue : 100},//Ф
+	
 	{ red : 60, green : 0, blue : 100},//
 	{ red : 100, green : 0, blue : 100},//
-	{ red : 100, green : 0, blue : 50},//
+	{ red : 80, green : 0, blue : 100},//
 ]
