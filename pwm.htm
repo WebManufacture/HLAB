@@ -184,30 +184,33 @@
 		-->
 		<!-- FerroPlayer -->
 		<div class="wrapper">
-        	<div class="logo"></div>
-			<div class="logo_khs"></div>
+        	<div class="logo" id='FerroLogoBox' onclick='StartColorShow();'></div>
         	<div class="color_circle">
-            	<div class="btn_1" onclick='SetColor(1);'></div>
-            	<div class="btn_2" onclick='SetColor(2);'></div>
-            	<div class="btn_3" onclick='SetColor(3);'></div>
-            	<div class="btn_4" onclick='SetColor(4);'></div>
+            	<div class="btn_1" onclick='SetColor(11);'></div>
+            	<div class="btn_2" onclick='SetColor(3);'></div>
+            	<div class="btn_3" onclick='SetColor(7);'></div>
+            	<div class="btn_4" onclick='SetColor(1);'></div>
             	<div class="btn_5" onclick='SetColor(5);'></div>
-            	<div class="btn_6" onclick='SetColor(6);'></div>
-            	<div class="btn_7" onclick='SetColor(7);'></div>
-            	<div class="btn_8" onclick='SetColor(8);'></div>
-            	<div class="btn_9" onclick='SetColor(9);'></div>
-            	<div class="btn_10" onclick='SetColor(10);'></div>
-            	<div class="btn_11" onclick='SetColor(11);'></div>
-            	<div class="btn_12" onclick='SetColor(12);'></div>
+            	<div class="btn_6" onclick='SetColor(9);'></div>
+            	<div class="btn_7" onclick='SetColor(12);'></div>
+            	<div class="btn_8" onclick='SetColor(2);'></div>
+            	<div class="btn_9" onclick='SetColor(4);'></div>
+            	<div class="btn_10" onclick='SetColor(6);'></div>
+            	<div class="btn_11" onclick='SetColor(8);'></div>
+            	<div class="btn_12" onclick='SetColor(10);'></div>
         	</div>
         	<div class="button">
-            	<div class="prev-prev" onclick='SetMotor(10, 0);' ></div>
-            	<div class="prev" onclick='SetMotor(4, 0);'></div>
-            	<div class="vibro" onclick='SetMotor(2, 2);'></div>
-            	<div class="next" onclick='SetMotor(0, 4);'></div>
-            	<div class="next-next" onclick='SetMotor(0, 10);'></div>
+            	<div class="prev-prev" onclick='SetMotor(30, 0);' ></div>
+            	<div class="prev" onclick='SetMotor(200, 0);'></div>
+            	<div class="next" onclick='SetMotor(0, 200);'></div>
+            	<div class="next-next" onclick='SetMotor(0, 30);'></div>
         	</div>
+			
+            	<div class="vibro" style='top: 130px;
+position: absolute;
+z-index: 200;' onclick='SetMotor(80, 80);'></div>
     	</div>
+		<div class="logo_khs" onclick='SetMotor(); SetColor(0);'></div>
 		<!-- FerroPlayer -->
 		<div id='DeviceLog' class='invisible debug-box'>
 
