@@ -20,10 +20,10 @@ WS.DOMload(function(){
 	});
 	
 	function checkIntersections(roboDiv){
-		roboDiv._sense.left = false;
-		roboDiv._sense.right = false;
-		roboDiv._sense.top = false;
-		roboDiv._sense.bottom = false;
+		roboDiv._sense.left = 0;
+		roboDiv._sense.right = 0;
+		roboDiv._sense.top = 0;
+		roboDiv._sense.bottom = 0;
 		var hasIntersect = false;
 		for (var i = 0; i < roboDivs.length; i++){
 			var crobo = roboDivs[i];
@@ -32,37 +32,37 @@ WS.DOMload(function(){
 					hasIntersect = true;
 					if (Math.abs(crobo._x - roboDiv._x) == roboW){
 						if (crobo._x < roboDiv._x){
-							roboDiv._sense.left = true;
+							roboDiv._sense.left = 65 + crobo._y - roboDiv._y;
 						}
 						else{
-							roboDiv._sense.right = true;
+							roboDiv._sense.right = 65 + crobo._y - roboDiv._y;
 						}
 					}
 					if (Math.abs(crobo._y - roboDiv._y) == roboH){
 						if (crobo._y < roboDiv._y){
-							roboDiv._sense.top = true;
+							roboDiv._sense.top = 65 + crobo._x - roboDiv._x;
 						}
 						else{
-							roboDiv._sense.bottom = true;
+							roboDiv._sense.bottom = 65 + crobo._x - roboDiv._x;
 						}
 					}
 				}
 			}
 		}
 		if (roboDiv._x <= 0) {
-			roboDiv._sense.left = true;
+			roboDiv._sense.left = 64;
 			hasIntersect = true;
 		}
 		if (roboDiv._y <= 0) {
-			roboDiv._sense.top = true;
+			roboDiv._sense.top = 64;
 			hasIntersect = true;
 		}
 		if (roboDiv._x >= maxX) {
-			roboDiv._sense.right = true;
+			roboDiv._sense.right = 64;
 			hasIntersect = true;
 		}
 		if (roboDiv._y >= maxY) {
-			roboDiv._sense.bottom = true;
+			roboDiv._sense.bottom = 64;
 			hasIntersect = true;
 		}
 		
