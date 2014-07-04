@@ -1,0 +1,15 @@
+{   
+	"MessagesUrl" : "http://188.127.233.35:6670",
+	"StateUrl":"http://188.127.233.35:6670",
+	"CommandUrl":"http://188.127.233.35:6670",
+	"ProgramUrl":"http://188.127.233.35:6670",
+	"xSpeed" : 7000,
+	"ySpeed" : 9000,
+	"zSpeed" : 9500, 
+	"speed" : 8000, 
+	"mmCoefX": 250, 
+	"mmCoefY": 500, 
+	"mmCoefZ": 60, 
+	"zGValue" : 30
+}
+		

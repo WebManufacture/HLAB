@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>UART control</title>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
+		<link type='text/css' rel='stylesheet' href="Index.css" />
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5/?join=true&content-type=text/javascript"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<style type='text/css'>
+
+		</style>
+		<script type='text/javascript'>
+			
+			WS.DOMload(function(){
+				UartManager.CreateSocket();
+			});
+			
+			UartManager = {
+				socketUrl : "ws://localhost:5000",	
+				
+				CreateSocket : function(){
+					UartManager.socket = new WebSocket(UartManager.socketUrl);
+					UartManager.socket.onopen = UartManager._onConnect;
+					UartManager.socket.onmessage = UartManager._onMessage;
+					UartManager.socket.onerror = UartManager._onError;
+				},
+				
+				Send : function(data){
+					UartManager.socket.send(JSON.stringify(data));
+				},
+				
+				_onConnect : function(){
+					console.log('connected');
+					setTimeout(function(){
+						UartManager.Send([1,2]);
+					}, 3000);
+				},
+				
+				_onMessage : function(event){
+					var message = JSON.parse(event.data);
+					if (message.type == 'config'){
+						var data = message.data
+						PortName.textContent = data.port + ":" + data.speed;
+						return;
+					}
+					if (message.type == 'from-uart-data'){
+						ContentPanel.div(".input", message.data + "");
+					}
+					if (message.type == 'to-uart-data'){
+						ContentPanel.div(".output", message.data + "");
+					}
+				},
+				
+				_onError : function(){
+					setTimeout(UartManager.CreateSocket, 3000);
+				}
+			}
+			
+				
+		</script>
+	</head>
+	<body class="">
+		<include url='http://services.web-manufacture.net/UI/Toolbars.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/UiUtils.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/HtmlElements.htm'></include>
+		<div id='HeaderBar' class='toolbar' style='text-align: left; padding-left: 10px;'>
+			<div class='menuitem resume' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="CNC.ProgCommand('resume');">
+				Start</div>			
+			<div class='menuitem stop' icon='http://cdn5.iconfinder.com/data/icons/48_px_web_icons/48/Signal_stop.png'	onclick="CNC.Command({command:3});">
+				Stop</div>
+			<div class='menuitem pause' icon='http://cdn1.iconfinder.com/data/icons/humano2/48x48/actions/gtk-media-pause.png' onclick="CNC.ProgCommand('pause');">
+				Pause</div>			
+			<div class='separator'>
+			</div>		
+			<div class='separator'>
+			</div>
+			<div class='menuitem' icon='http://cdn1.iconfinder.com/data/icons/Vista-Inspirate_1.0/48x48/apps/advancedsettings.png' onclick="RoboUI.ShowSettings();">
+				Settings
+			</div>
+		</div>
+		<div id='StatusBar'>
+				Порт: 
+				<div class='sbar-elem port-elem'>
+					<span id='PortName'></span>
+				</div>
+				<div class='sbar-elem last-command program-state'>
+					<span id='currentCommand'></span>
+				</div>
+			</div>
+		<div id='ContentPanel'>
+			
+		</div>
+	</body>
+</html>
+

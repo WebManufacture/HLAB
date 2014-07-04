@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>RoboMind control</title>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
+		<link type='text/css' rel='stylesheet' href="Index.css" />
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Utils.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/DOM.js"></script>	
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Events.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Log.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Url.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Jasp.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Net.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Modules.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/ui.js"></script>
+
+		<script type='text/javascript' src='http://services.web-manufacture.net/SysUtils/NodeEnvironment.js'>		</script>
+		<script type='text/javascript' src='http://modules.web-manufacture.net/Channels.js'>		</script>
+		<script type='text/javascript' src='http://modules.web-manufacture.net/Async.js'>		</script>
+
+		<script src="/socket.io/socket.io.js"></script>
+
+		<script type='text/javascript' src='Uart.js'>		</script>
+		<script type='text/javascript' src='Index.js'>		</script>
+		<script type='text/javascript' src='editor.js'>		</script>
+
+		<style type='text/css'>
+
+		</style>
+		<script type='text/javascript'>
+			M.ServicesUrl = "http://services.web-manufacture.net";
+			M.ModulesUrl = "http://modules.web-manufacture.net";
+			M.SystemUrl = "http://system.web-mnanufacture.net";
+
+
+			WS.DOMload(function(){
+
+				/*socket = new WebSocket("ws://localhost:5000");
+				socket.onopen = (function(s){
+					console.log("connected");
+				});
+				socket.onmessage = function(m){
+					var data = JSON.parse(m.data);
+					if (typeof data == 'object'){
+
+					}
+				};*/		
+			});
+
+			function onCell_Selected(cell){
+				cell.value = 255;
+				programText.textContent = "Cell: " + cell.row + " " + cell.col + " " + cell.value;
+			}
+
+			function onCell_UnSelected(cell){
+				cell.value = 0;
+				programText.textContent = "Cell: " + cell.row + " " + cell.col + " " + cell.value;
+			}
+
+
+		</script>
+	</head>
+	<body class="">
+		<include url="http://services.web-manufacture.net/Grids/SimpleGrids.js"></include>
+		<include url='http://services.web-manufacture.net/UI/Toolbars.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/UiUtils.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/Win.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/HtmlElements.htm'></include>
+		<include url="CellsManager.htm"></include>
+
+		<div id="UiSettingsWindow" class='window invisible' title='Настройки'>
+			<div class='current-port'>
+				Текущий порт: <input type='text' id='CurrentPort' class='hintable-box'/>	
+			</div>
+			<div id='AvailablePorts'>
+
+			</div>
+		</div>
+		<div id='HeaderBar' class='toolbar'>
+			<div class='menuitem resume' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="CNC.ProgCommand('resume');">
+				Start</div>			
+			<div class='menuitem stop' icon='http://cdn5.iconfinder.com/data/icons/48_px_web_icons/48/Signal_stop.png'	onclick="CNC.Command({command:3});">
+				Stop</div>
+			<div class='menuitem pause' icon='http://cdn1.iconfinder.com/data/icons/humano2/48x48/actions/gtk-media-pause.png' onclick="CNC.ProgCommand('pause');">
+				Pause</div>			
+			<div class='separator'>
+			</div>			
+			<div class='menuitem pin' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="PointsWin.FixPoint();">
+				Fix point</div>
+			<div class='menuitem' icon='http://cdn2.iconfinder.com/data/icons/humano2/48x48/actions/mail-reply-all.png' onclick="MovingWindow.Show();">
+				Moving</div>			
+			<div class='menuitem' icon='http://cdn2.iconfinder.com/data/icons/gnomeicontheme/32x32/actions/redhat-home.png' onclick="CNC.QuickCommand('Z 0 600');CNC.QuickCommand('G 5000 5000 0');CNC.QuickCommand('G 0 0 0');">
+				Park</div>
+			<div class='menuitem' icon='http://cdn2.iconfinder.com/data/icons/gnomeicontheme/32x32/actions/redhat-home.png' onclick="CNC.Rebase(0, 0, 0);">
+				Base
+			</div>
+			<div class='separator'>
+			</div>
+			<div class='menuitem' icon='http://cdn1.iconfinder.com/data/icons/Vista-Inspirate_1.0/48x48/apps/advancedsettings.png' onclick="RoboUI.ShowSettings();">
+				Settings
+			</div>
+		</div>
+		<div id='ContentPanel'>
+			<div id='StatusBar'>
+				Порт: 
+				<div class='sbar-elem port-elem'>
+					<span id='PortName'></span>
+				</div>
+				<div class='sbar-elem command line program-state' style='font-size: 20px; color: gray'>
+					(<span id='currentLine'></span>)
+				</div>
+				<div class='sbar-elem last-command program-state'>
+					<span id='currentCommand'></span>
+				</div>
+			</div>
+			
+			<div id="CellsManager" class='cells-manager' cellsize='20' rows='10' columns='300'>
+
+			</div>
+			<div id="ChannelManager" class='cells-manager' cellsize='5' rows='32' columns='300'>
+
+			</div>
+			<div id='FilesBrowser' class="invisible">	
+				<div class='toolbar'>
+					<div class='menuitem' icon='https://cdn3.iconfinder.com/data/icons/musthave/32/Add.png' onclick="RoboUI.NewProgram();"></div>
+					<div class='menuitem' icon='https://cdn3.iconfinder.com/data/icons/musthave/32/Save.png' onclick="RoboUI.SaveProgram();"></div>
+				</div>
+				<input type='text' id='FileNameBox' class='hintable-box' />
+				<div id='FilesContainer' class='container'>
+
+				</div>
+			</div>
+			<div id='ProgramArea' class=''>
+				<textarea id='programText' onchange='RoboUI.SaveProgram();'></textarea>	
+			</div>
+		</div>
+	</body>
+</html>
+
