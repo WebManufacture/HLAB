@@ -14,12 +14,12 @@ function RoboController2(robo){
 		}
 
 
-		if (robo.Sensor.top == true){
+		if (robo.Sensor.top){
 			robo.goDown();
 			robo.setText("D");
  		}
 		
-		else if (robo.Sensor.right == true){
+		else if (robo.Sensor.right){
 			if (robo.X > 450){
 				robo.goUp() ;			
 				robo.setText("R");
@@ -31,7 +31,7 @@ function RoboController2(robo){
 			
 		}
 		
-		else if (robo.Sensor.bottom == true){
+		else if (robo.Sensor.bottom){
 			robo.goUp() ;			
 			robo.setText("U");
 		}

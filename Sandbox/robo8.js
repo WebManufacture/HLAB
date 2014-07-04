@@ -3,18 +3,18 @@ function RoboController8(robo){
 	
 	this.onInterval = function(){
 		var goVector = { x : 1 , y : 0 };
-		robo.setText(robo.Sensor.right);
-		robo.state = {};
+		robo.setText(robo.Sensor.rightValue);
 		if (!robo.isFree()){
+			
 			if (robo.Sensor.right){
-				if (robo.Sensor.right < 64){
-					
+				if (robo.Sensor.rightValue < 64){
 					robo.goDown();
 				}
 				else{
 					robo.goUp();
 				}
 			}
+			
 		}
 		robo.goVector(goVector.x, goVector.y);
 	}

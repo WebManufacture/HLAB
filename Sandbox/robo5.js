@@ -1,66 +1,66 @@
 function RoboController5(robo){
-	this.robo = robo;
-	this.robo.state = {up: 0, down:0};
+	this.robo = robo;	
+	robo.roadPlan = [{x:10000, y: robo.Y}];
 	
 	this.onInterval = function(){
 		
-		//var goVector = {};
-			
-				
-		//robo.setText(robo.Sensor.right);
-		/*function state() {
-  			var value = 0;
-     
- 			return {
-   				up: function() { 
-    				return value = 1;
-    			},
-  
-    			down: function() { 
-      				return value = -1;
-    			},
- 
-    			reset: function() {
-      				return value = 0;
-    			}
-  			};
-		}
- 
-		var set = state();*/
-				
-		if (!robo.isFree()){
-			if (robo.Sensor.right){
-				if (robo.Sensor.right < 64 && robo.state.up == 0 && robo.state.down == 0){
-					robo.goDown();
-					if (robo.Sensor.bottom){
-						robo.state.down = 1;
-					}
+		var goVector = {};
+		
+		//robo.roadPlan = [{x:10000, y: robo.Y}];
+		
+		if (!robo.isFree()) {
+			if (robo.Sensor.right) {
+				if (robo.Sensor.rightValue > 0) {
+					//robo.goDown();
+					//robo.roadPlan = [];
+					robo.roadPlan.push({x: robo.X, y: robo.Y + 65 - robo.Sensor.rightValue});			
 				}
-				if (robo.Sensor.right > 64 && robo.state.up == 0 && robo.state.down == 0){
-					robo.goUp();
-					if (robo.Sensor.top){
-						robo.state.up = 1;
-					}
+				else{
+					//robo.goUp();
+					//robo.roadPlan = [];
+					robo.roadPlan.push({x: robo.X, y: robo.Y - 65 + robo.Sensor.rightValue});
 				}
-				if (robo.state.up == 1){
-					robo.goDown();
-				}
-				if (robo.state.down == 1){
-					robo.goUp();
-				}
-				if (robo.state.up == 1 && robo.state.down == 1){
-					robo.goLeft();
-				}
-					
 			}
-			else {
-				robo.goRight();
-				robo.state.up = 0;
-				robo.state.down = 0;
+			if (robo.Sensor.top) {
+					robo.roadPlan.push({x: 1000, y:robo.Y});
+				if (robo.Sensor.right) {
+					robo.roadPlan.push({x: robo.X, y:robo.Y - robo.Sensor.rightValue + 65 });
+				}
+				
+			}
+			if (robo.Sensor.bottom) {
+				robo.roadPlan.push({x: 1000, y:robo.Y});
+				if (robo.Sensor.right) {
+					robo.roadPlan.push({x: robo.X, y:robo.Y - robo.Sensor.rightValue - 65 });
+				}
 			}
 		}
-		robo.setText(robo.state.up + robo.state.down)
-		//robo.goVector(goVector.x, goVector.y);
+		else {
+			robo.roadPlan = [];
+			robo.roadPlan.push({x: 10000, y: robo.Y})
+		}
+		
+		if (robo.roadPlan[robo.roadPlan.length-1].x > robo.X) {
+			goVector.x = 1;
+		}
+		if (robo.roadPlan[robo.roadPlan.length-1].x < robo.X) {
+			goVector.x = -1;
+		}
+		if (robo.roadPlan[robo.roadPlan.length-1].x == robo.X) {
+			goVector.x = 0;
+		}
+		if (robo.roadPlan[robo.roadPlan.length-1].y > robo.Y) {
+			goVector.y = 1
+		}
+		if (robo.roadPlan[robo.roadPlan.length-1].y < robo.Y) {
+			goVector.y = -1
+		}
+		if (robo.roadPlan[robo.roadPlan.length-1].y == robo.Y) {
+			goVector.y = 0
+		}		
+		robo.setText(robo.Sensor.rightValue);
+		robo.goVector( goVector.x, goVector.y );				
+		
 	}
 }
 

@@ -6,7 +6,7 @@ function RoboController4(robo){
 	this.mainVector = {};
 	
 	this.onInterval = function(){
-		//robo.goRight();
+		robo.goRight();
 
 		if (!robo.isFree()){
 			if (robo.Sensor.left) this.mainVector.x = 3;
@@ -17,11 +17,11 @@ function RoboController4(robo){
 		}
 
 
-		if (robo.Sensor.top == true){
+		if (robo.Sensor.top){
 			robo.goDown();
 			robo.setText("↓");
  		}
-		else if (robo.Sensor.right == true){
+		else if (robo.Sensor.right){
 			if (robo.X > 450){
 				robo.goUp() ;			
 				robo.setText("→");
@@ -32,7 +32,7 @@ function RoboController4(robo){
 			}			
 			
 		}
-		else if (robo.Sensor.bottom == true){
+		else if (robo.Sensor.bottom){
 			robo.goUp() ;			
 			robo.setText("↑");
 		}

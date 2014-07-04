@@ -1,9 +1,9 @@
 WS.DOMload(function(){
 	if (window.OnPageLoaded) window.OnPageLoaded();
-	
+
 	var robos = [];
 	var roboDivs = DOM.all(".robo");
-	
+
 	var roboW = Robo0.offsetWidth;
 	var roboH = Robo0.offsetHeight;
 
@@ -18,61 +18,65 @@ WS.DOMload(function(){
 			return ContentPanel.offsetHeight - roboH;
 		}
 	});
-	
+
 	function checkIntersections(roboDiv){
-		roboDiv._sense.left = 0;
-		roboDiv._sense.right = 0;
-		roboDiv._sense.top = 0;
-		roboDiv._sense.bottom = 0;
+		roboDiv._sense.leftValue = null;
+		roboDiv._sense.rightValue = null;
+		roboDiv._sense.topValue = null;
+		roboDiv._sense.bottomValue = null;
 		var hasIntersect = false;
 		for (var i = 0; i < roboDivs.length; i++){
 			var crobo = roboDivs[i];
 			if (crobo != roboDiv){
-				if (Math.abs(crobo._x - roboDiv._x) <= roboW && Math.abs(crobo._y - roboDiv._y) <= roboH){
+				if (Math.abs(crobo._x - roboDiv._x) <= roboW && Math.abs(crobo._y - roboDiv._y) <= roboH && !(Math.abs(crobo._x - roboDiv._x) == roboW && Math.abs(crobo._y - roboDiv._y) == roboH)){
 					hasIntersect = true;
 					if (Math.abs(crobo._x - roboDiv._x) == roboW){
 						if (crobo._x < roboDiv._x){
-							roboDiv._sense.left = 65 + crobo._y - roboDiv._y;
+							roboDiv._sense.leftValue = roboDiv._y - crobo._y;														
+							//А как отличить реальное отличие на 1 и нереальное ? :)
+							/*if (roboDiv._sense.left == 0) {
+								roboDiv._sense.left = 1;
+							}*/
 						}
 						else{
-							roboDiv._sense.right = 65 + crobo._y - roboDiv._y;
+							roboDiv._sense.rightValue = roboDiv._y - crobo._y;
 						}
 					}
 					if (Math.abs(crobo._y - roboDiv._y) == roboH){
 						if (crobo._y < roboDiv._y){
-							roboDiv._sense.top = 65 + crobo._x - roboDiv._x;
+							roboDiv._sense.topValue = roboDiv._x - crobo._x;
 						}
 						else{
-							roboDiv._sense.bottom = 65 + crobo._x - roboDiv._x;
+							roboDiv._sense.bottomValue = roboDiv._x - crobo._x; 
 						}
 					}
 				}
 			}
 		}
 		if (roboDiv._x <= 0) {
-			roboDiv._sense.left = 64;
+			roboDiv._sense.leftValue = 100;
 			hasIntersect = true;
 		}
 		if (roboDiv._y <= 0) {
-			roboDiv._sense.top = 64;
+			roboDiv._sense.topValue = 100;
 			hasIntersect = true;
 		}
 		if (roboDiv._x >= maxX) {
-			roboDiv._sense.right = 64;
+			roboDiv._sense.rightValue = 100;
 			hasIntersect = true;
 		}
 		if (roboDiv._y >= maxY) {
-			roboDiv._sense.bottom = 64;
+			roboDiv._sense.bottomValue = 100;
 			hasIntersect = true;
 		}
-		
+
 		if (roboDiv._sense.left) {
 			roboDiv.style.borderLeft = "solid 1px red";
 		}
 		else{
 			roboDiv.style.borderLeft = '';
 		}
-		
+
 		if (roboDiv._sense.right) {
 			roboDiv.style.borderRight = "solid 1px red";
 		}
@@ -94,10 +98,9 @@ WS.DOMload(function(){
 			roboDiv.style.borderBottom = '';
 		}
 
-
 		return hasIntersect;
 	}
-			
+
 	for (var i = 31; i  < 50; i++){
 		var food = ContentPanel.div(".food");
 		var x = Math.random() * maxX;
@@ -105,7 +108,7 @@ WS.DOMload(function(){
 		food.style.left = x + "px";
 		food.style.top = y + "px";
 	}
-		
+
 	function placeRobot(roboDiv){
 		setTimeout(function(){
 			var x = Math.random() * maxX;
@@ -118,7 +121,7 @@ WS.DOMload(function(){
 		}, 100);
 	}
 	var clength = roboDivs.length; 
-		
+
 	for (var i = 0; i < clength; i++){
 		var roboDiv = roboDivs[i];
 		var robo = robos[i] = new Robo(roboDiv);
@@ -127,7 +130,7 @@ WS.DOMload(function(){
 		//roboDiv.SetCoord(0, roboH * i + 1);
 		roboDiv.SetCoord(0, roboH * i + 1);
 	};
-	
+
 	for (var i = clength; i < 30; i++){
 		var roboDiv = ContentPanel.div(".robo.standart");
 		var robo = robos[i] = new Robo(roboDiv);
@@ -135,9 +138,9 @@ WS.DOMload(function(){
 		roboDiv.textContent = i;
 		placeRobot(roboDiv);
 	}
-	
+
 	roboDivs = DOM.all(".robo");
-	
+
 	var intervals = [];
 	var controllers = [];
 	var scripts = [];
@@ -176,7 +179,7 @@ WS.DOMload(function(){
 		fHead.appendChild(script);
 		frames.push(iFrame);*/
 	}
-	
+
 	function ProcessTick(){
 		for (var i = 0; i < controllers.length; i++){
 			var controller = controllers[i];
@@ -184,7 +187,7 @@ WS.DOMload(function(){
 				roboDivs[i].StartStep();
 				checkIntersections(roboDivs[i]);
 				try{
-				controller.onInterval(controller.robo);
+					controller.onInterval(controller.robo);
 				}
 				catch(e){
 					console.log(e);
@@ -192,11 +195,11 @@ WS.DOMload(function(){
 			}
 		}				
 	}	
-	
+
 	var timeout = 10;
-	
+
 	var interval = null; 
-	
+
 	Init = function(){
 		if (interval) return;
 		for (var i = 0; i < robos.length; i++){
@@ -204,7 +207,7 @@ WS.DOMload(function(){
 			robo.saveState();
 		}
 	}
-	
+
 	Start = function(){					  
 		if (interval) return;
 		/*for (var i = 0; i < robos.length; i++){
@@ -212,11 +215,11 @@ WS.DOMload(function(){
 		}*/
 		interval = setInterval(ProcessTick, timeout);
 	};
-	
+
 	Stop = function(){		
 		clearInterval(interval);
 		interval = null;
 	};
-	
+
 	Init();
 });

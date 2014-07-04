@@ -102,7 +102,28 @@ function Robo(robo){
 	robo._xShift = robo.offsetLeft;
 	robo._y = 0;
 	robo._yShift = robo.offsetTop;		
-	robo._sense = {left : false, right: false, top: false, bottom : false};
+	robo._sense = {leftValue : null, rightValue: null, topValue: null, bottomValue : null};
+	
+	Object.defineProperty(robo._sense, "left", {
+		get:function(){
+			return this.leftValue !== null;
+		}
+	});	
+	Object.defineProperty(robo._sense, "right", {
+		get:function(){
+			return this.rightValue !== null;
+		}
+	});
+	Object.defineProperty(robo._sense, "top", {
+		get:function(){
+			return this.topValue !== null;
+		}
+	});
+	Object.defineProperty(robo._sense, "bottom", {
+		get:function(){
+			return this.bottomValue !== null;
+		}
+	});
 }
 
 Robo.prototype = {
