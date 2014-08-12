@@ -1,8 +1,8 @@
 {   
-	"MessagesUrl" : "http://188.127.233.35:6670",
-	"StateUrl":"http://188.127.233.35:6670",
-	"CommandUrl":"http://188.127.233.35:6670",
-	"ProgramUrl":"http://188.127.233.35:6670",
+	"MessagesUrl" : "http://localhost:6670",
+	"StateUrl":"http://localhost:6670",
+	"CommandUrl":"http://localhost:6670",
+	"ProgramUrl":"http://localhost:6670",
 	"xSpeed" : 7000,
 	"ySpeed" : 9000,
 	"zSpeed" : 9500, 
