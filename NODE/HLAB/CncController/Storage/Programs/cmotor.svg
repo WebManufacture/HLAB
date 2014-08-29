@@ -16,6 +16,7 @@
    height="90"
    x-ratio="1" y-ratio='1'
    id="svg2"
+   speed="3000" 
    inkscape:version="0.48.2 r9819"
    sodipodi:docname="cmotor.svg">
   <metadata

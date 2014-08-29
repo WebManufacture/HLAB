@@ -9,7 +9,7 @@
 	"speed" : 8000, 
 	"mmCoefX": 250, 
 	"mmCoefY": 500, 
-	"mmCoefZ": 60, 
-	"zGValue" : 30
+	"mmCoefZ": 100, 
+	"zGValue" : 50
 }
 		

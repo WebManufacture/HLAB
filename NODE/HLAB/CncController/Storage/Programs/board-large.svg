@@ -2,7 +2,7 @@
 <svg
 xmlns:svg="http://www.w3.org/2000/svg"
  xmlns="http://www.w3.org/2000/svg"
- x-ratio='0.5' y-ratio='0.5' speed='6000' 
+ x-ratio='0.5' y-ratio='0.5' speed='2000' 
 >
 <path
        style="fill:#000000"
