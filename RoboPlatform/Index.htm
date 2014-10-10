@@ -5,27 +5,103 @@
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
 		<link type='text/css' rel='stylesheet' href="Index.css" />
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Utils.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/DOM.js"></script>	
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Events.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Log.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Url.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Jasp.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Net.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/Modules.js"></script>
-		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.4/ui.js"></script>
-
-		<script type='text/javascript' src='http://services.web-manufacture.net/SysUtils/NodeEnvironment.js'>		</script>
-		<script type='text/javascript' src='http://modules.web-manufacture.net/Channels.js'>		</script>
-		<script type='text/javascript' src='http://modules.web-manufacture.net/Async.js'>		</script>
-
-		<script src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5/?join=true"></script>
 
 		<script type='text/javascript' src='Uart.js'>		</script>
-		<script type='text/javascript' src='Index.js'>		</script>
+		<script type='text/javascript' src='value-editor.js'>		</script>
 		<script type='text/javascript' src='editor.js'>		</script>
-
+		<script type='text/javascript' src='cmanager.js'>		</script>
+		<script type='text/javascript' src='programUI.js'>		</script>
 		<style type='text/css'>
+			#ValuePicker{
+				text-align : center;
+			}
+			
+			#ValuePicker .value-btn{
+				width: 35px;
+				height: 34px;
+				display: inline-block;
+				border: solid 1px gray;
+				padding: 2px;
+				box-sizing: border-box;
+				padding-top: 5px;
+				-moz-box-sizing: border-box;
+			}
+			
+			#ValuePicker .value-btn:hover{
+				border: solid 2px black;
+				padding: 1px;
+				padding-top: 4px;
+			}
+
+			#ValuePicker #MinValueBtn{
+				background-color: #fcc;
+			}
+
+			#ValuePicker #MaxValueBtn{
+				background-color: lightgreen;
+			}
+
+			#ValuePicker #ValueBar:hover{
+				border: solid 2px black;
+				padding: 2px;				
+				padding-top: 4px;
+			}
+			
+			#ValuePicker #ValueBar:hover .title,
+			#ValuePicker #ValueBar:hover .inner
+			{
+				height: 30px;
+				width: 96px;
+				top: 1;
+				left :1;
+			}
+			
+			#ValuePicker #ValueBar:hover .title{
+				padding-top:4px;
+			}
+			
+			#ValuePicker #ValueBar{
+				width: 100px;
+				height: 34px;				
+				display: inline-block;
+				border: solid 1px gray;				
+				box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				position: relative;
+				padding-top: 5px;
+				padding-bottom: 1px;
+			}
+			
+			#ValuePicker #ValueBar .inner{
+				background-color: rgb(0, 125, 120);
+				height: 32px;
+				left: 0;
+				position: absolute;
+				top: 0;
+				width: 98px;
+				z-index: 1;
+			}
+			
+			#ValuePicker #ValueBar .title{
+				height: 32px;
+				left: 0;
+				position: absolute;
+				top: 0;
+				width: 98px;
+				z-index: 2;
+				-moz-box-sizing: border-box;
+				padding-top: 5px;
+				padding-bottom: 1px;
+			}
+
+			#ValuePicker #FrequencyValue{
+				width: 160px;
+				line-height: 14px;
+				min-width: 150px;
+				height: 20px;
+				padding-top: 2px;
+			}
 
 		</style>
 		<script type='text/javascript'>
@@ -33,133 +109,14 @@
 			M.ModulesUrl = "http://modules.web-manufacture.net";
 			M.SystemUrl = "http://system.web-mnanufacture.net";
 
-			CManager = {};
-			
-			CManager._mixin = {
-				InitElem : function(){
-					this.Fill();
-					var hrow = this.get("#row0");
-					hrow.add(".header");
-					var cells = hrow.all(".cell");
-					for (var i = 0; i < cells.length; i++){
-						cells[i].textContent = i + 1;	
-					}
-					var cells = this.all(".cell[col='0']");
-					for (var i = 1; i < cells.length; i++){
-						cells[i].textContent = i;	
-						cells[i].add(".gutter");
-					}
-					this.emit("init");
-				},
-
-				Fill : function(){
-					this.all(".cell").del();
-					for (var i = 0; i < this.Rows + 1; i++){
-						var row = this.CreateRow(i);
-					}
-				},
-
-				CreateRow: function(rnum){
-					var row = this.IDiv.div(".row");
-					row.id = "row" + rnum;
-					for (var i = 0; i < this.Cols + 1; i++){
-						row.add(this._initCell(i, rnum));
-					}
-					return row;
-				},
-
-				_initCell: function(col, row){
-					var cell = DOM.div(".cell", "&nbsp;");
-					cell.id = "cell" + row + "_" + col;
-					cell.set("@col", col);
-					cell.set("@row", row);
-					cell.row = row;
-					cell.col = col;
-					cell.value = 0;
-					var table = this;
-					cell.onclick = function(event){
-						table._onCellClick.call(this, event, table);
-						table.emit("cellClick", this);
-					};		
-					cell.onmouseenter = function(event){
-						table._onCellEnter.call(this, event, table);
-					};		
-					return cell;
-				},
-
-				_onCellClick : function(event, table){
-					if (this.col <= 0){
-						table.emit("gutter_click", this);
-						return;
-					}
-					if (this.row <= 0){
-						table.emit("header_click", this);
-						return;
-					}
-					WS.ToggleClass(this,"selected");	
-					if (this.is(".selected")){
-						table.emit("cell_selected", this);
-					}
-					else{
-						table.emit("cell_unselected", this);
-					}
-				},
-
-
-				_onCellEnter : function(event, table){
-					if (this.col <= 0 || this.row <= 0) return;
-					var hcol = table.get(".row.header .cell[col='" + this.col + "']"); 
-					if (hcol){
-						table.all(".row.header .cell.current").del(".current");	
-						hcol.add(".current");
-					}
-					if (event.buttons == 1){
-						WS.ToggleClass(this, "selected");
-						if (this.is(".selected")){
-							table.emit("cell_selected", this);
-						}
-						else{
-							table.emit("cell_unselected", this);
-						}
-					}
-				},
-			};
-			
-			CManager.Init = function(table, options){
-				Extend(table, Channel.prototype);	
-				Extend(table, CManager._mixin);
-				Channel.prototype.constructor.call(table);
-
-				table.Cols = parseInt(table.get("@columns"));
-				table.Rows = parseInt(table.get("@rows"));
-				table.CellSize = parseInt(table.get("@cellsize"));
-
-				if (options && options.cols){
-					table.Cols = options.cols;
-				}
-				if (options && options.rows){
-					table.Rows = options.rows;
-				}
-				if (options && options.width){
-					table.CellSize = options.width;
-				}
-
-				table.IDiv = table.div(".internal");
-				var isize = ((table.CellSize) * (table.Cols + 1));
-				table.IDiv.set("@style", "width : " + isize + "px;");
-				table.add(".initialized");
-				for (var item in table){
-					if (item.indexOf("on") == 0 && typeof(table[item]) == 'function'){
-						table.on(item.replace("on", '').toLowerCase(), table[item]);
-					}
-				}
-				table.InitElem();
-				return table;
-			};
-
 			WS.DOMload(function(){
-				CManager.Init(MainManager);
-				CManager.Init(ChannelManager);
+				CManager.Init(CellField);
+				CellField.on("cell_enter", onCell_Hover);
+				ValueEditor.Init(CellField);
+				PUI.Init(CellField);
+				ProgramEditor.Init(ProgramWin);
+				PUI.Load();
+				//CManager.Init(ChannelManager);
 				/*socket = new WebSocket("ws://localhost:5000");
 				socket.onopen = (function(s){
 					console.log("connected");
@@ -172,15 +129,11 @@
 				};*/		
 			});
 
-			function onCell_Selected(cell){
-				cell.value = 255;
-				programText.textContent = "Cell: " + cell.row + " " + cell.col + " " + cell.value;
+			function onCell_Hover(message, cell, event){
+				CoordDisplay.set("Ch: " + cell.row + " T: " + cell.col);				
 			}
 
-			function onCell_UnSelected(cell){
-				cell.value = 0;
-				programText.textContent = "Cell: " + cell.row + " " + cell.col + " " + cell.value;
-			}
+			
 
 
 		</script>
@@ -199,51 +152,120 @@
 
 			</div>
 		</div>
+		
+		<div id="LinesHelpWindow" class='window invisible help-win' title='Справка' style='width: 300px'>
+			Функция работает так:
+			
+			1й раз вы выделяете ячейку начала. Для того, чтобы обозначить конечную ячейку - кликните по ней с зажатой кнопкой CTRL.
+			
+			Тогда все ячейки между начальной и конечной заполняться текущим выбранным значением.
+		</div>
+		
+		<div id="ProgramWin" class='window invisible' title='Программа' style='width: 600px; height: 400px;'>
+			<textarea class='program-text' style='width: 100%; height: 100%;'></textarea>
+		</div>
+		
 		<div id='HeaderBar' class='toolbar'>
-			<div class='menuitem resume' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="CNC.ProgCommand('resume');">
-				Start</div>			
-			<div class='menuitem stop' icon='http://cdn5.iconfinder.com/data/icons/48_px_web_icons/48/Signal_stop.png'	onclick="CNC.Command({command:3});">
-				Stop</div>
-			<div class='menuitem pause' icon='http://cdn1.iconfinder.com/data/icons/humano2/48x48/actions/gtk-media-pause.png' onclick="CNC.ProgCommand('pause');">
-				Pause</div>			
+			<div id='StatusBar' class='subbar'>
+				<div class='port-state'>
+					Порт: 
+					<div class='sbar-elem port-elem'>
+						<span id='PortName'></span>
+					</div>
+					<div class='sbar-elem command line program-state' style='font-size: 20px; color: gray'>
+						(<span id='currentLine'></span>)
+					</div>
+					<div class='sbar-elem last-command program-state'>
+						<span id='currentCommand'></span>
+					</div>
+				</div>
+				<div id='CoordDisplay'>
+
+				</div>
+			</div>
+
+			<div id='EditorHelper' class='subbar'>
+
+				<div id='ValuePicker'>
+					<div class='by-value'>
+						<div id='MinValueBtn' class='value-btn'>Off</div>
+						<div id='ValueBar'>
+							&nbsp;
+							<div class='title'>100%</div>
+							<div class='inner'></div>
+						</div>
+						<div id='MaxValueBtn' class='value-btn'>On</div>
+					</div>
+					<div class='by-freq'>
+						<input type='text' id='FrequencyValue' value=''/>
+					</div>
+				</div>
+			</div>
+
+			<div class='menuitem switch switched' tool='Pencil' id='PencilMenuItem' switch-group='tool' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="">
+				Pencil</div>			
+			<div class='menuitem switch' tool='Lines'  id='LinesMenuItem' switch-group='tool' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="">
+				Lines</div>
+			<div class='menuitem switch' tool='Pitch'  id='PitchMenuItem' switch-group='tool' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="">
+				Pitch</div>
+
 			<div class='separator'>
+			</div>
+
+			<div class='menuitem invisible' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="">
+				FixRow	
 			</div>			
-			<div class='menuitem pin' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="PointsWin.FixPoint();">
-				Fix point</div>
-			<div class='menuitem' icon='http://cdn2.iconfinder.com/data/icons/humano2/48x48/actions/mail-reply-all.png' onclick="MovingWindow.Show();">
-				Moving</div>			
-			<div class='menuitem' icon='http://cdn2.iconfinder.com/data/icons/gnomeicontheme/32x32/actions/redhat-home.png' onclick="CNC.QuickCommand('Z 0 600');CNC.QuickCommand('G 5000 5000 0');CNC.QuickCommand('G 0 0 0');">
-				Park</div>
-			<div class='menuitem' icon='http://cdn2.iconfinder.com/data/icons/gnomeicontheme/32x32/actions/redhat-home.png' onclick="CNC.Rebase(0, 0, 0);">
-				Base
+			<div class='menuitem switch' id='SynchroMenuItem' switch-group='tool' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="">
+				Synchro
+			</div>
+
+			<div class='separator'>
+			</div>
+			<div class='menuitem' icon='http://cdn1.iconfinder.com/data/icons/humility-icons-MERGE/24x24/stock/gtk-refresh.png' onclick="PUI.Clear();">
+				Clear!</div>
+			<div class='menuitem' icon='http://system.web-manufacture.net/Images/emblem-system.png' onclick="ProgramEditor.LoadProgram(PUI.GetProgram())">
+				Compile</div>
+			<div class='menuitem fixedsize' icon='http://www.iconsearch.ru/uploads/icons/realistik-new/128x128/memory.png' onclick="">
+				Program</div>
+			<div class='menuitem' icon='http://system.web-manufacture.net/Images/save-mini.png' onclick="PUI.Save();">
+				Save
 			</div>
 			<div class='separator'>
 			</div>
+
+			<div class='menuitem start' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="">
+				Start
+				<influence class='add' target='.menuitem.start'>.disabled</influence>
+				<influence class='del' target='.menuitem.stop'>.disabled</influence>
+				<influence class='del' target='.menuitem.pause'>.disabled</influence>
+			</div>			
+			<div class='menuitem stop disabled' icon='http://cdn5.iconfinder.com/data/icons/48_px_web_icons/48/Signal_stop.png'	onclick="">
+				Stop
+				<influence class='add' target='.menuitem.stop'>.disabled</influence>
+				<influence class='del' target='.menuitem.start'>.disabled</influence>
+				<influence class='add' target='.menuitem.pause'>.disabled</influence>
+			</div>
+			<div class='menuitem pause disabled' icon='http://cdn1.iconfinder.com/data/icons/humano2/48x48/actions/gtk-media-pause.png' onclick="">
+				Pause
+				<influence class='del' target='.menuitem.start'>.disabled</influence>
+			</div>			
+			<div class='separator'>
+			</div>	
+
+			<div class='menuitem pin' icon='https://cdn1.iconfinder.com/data/icons/oxygen/48x48/actions/note2.png' onclick="">
+				Row Tools</div>
 			<div class='menuitem' icon='http://cdn1.iconfinder.com/data/icons/Vista-Inspirate_1.0/48x48/apps/advancedsettings.png' onclick="RoboUI.ShowSettings();">
 				Settings
 			</div>
 		</div>
 		<div id='ContentPanel'>
-			<div id='StatusBar'>
-				Порт: 
-				<div class='sbar-elem port-elem'>
-					<span id='PortName'></span>
-				</div>
-				<div class='sbar-elem command line program-state' style='font-size: 20px; color: gray'>
-					(<span id='currentLine'></span>)
-				</div>
-				<div class='sbar-elem last-command program-state'>
-					<span id='currentCommand'></span>
-				</div>
-			</div>
-			
-			<div id="MainManager" class='cells-manager' cellsize='10' rows='10' columns='300'>
 
-			</div>
-			<div id="ChannelManager" class='cells-manager' cellsize='5' rows='32' columns='300'>
+
+			<div id="CellField" class='cells-manager' cellsize='20' rows='24' columns='300'>
 
 			</div>
 		</div>
+		<script type='text/javascript' src='Addition.js'>		</script>
 	</body>
 </html>
 

@@ -3,6 +3,7 @@ ProgramEditor = {};
 ProgramEditor.Init = function(win){
 	Extend(win, this);
 	win.editor = win.get(".program-text");	
+	ProgramEditor.Win = win;
 };
 
 ProgramEditor.SaveProgram = function(){
@@ -25,11 +26,19 @@ ProgramEditor.SaveProgram = function(){
 	}
 };
 
-ProgramEditor.LoadProgram = function(fname){
-	var win = this;
-	Storage.get("programs/" + fname + "?rnd=" + Math.random(), function(result){
+ProgramEditor.LoadProgram = function(prog){
+	var win = ProgramEditor.Win;
+	console.log(prog);
+	win.Show();
+	var txt = "Summary: " + prog.commands + " commands\n";
+	for (var i = 0; i < prog.flat.length; i++ ){
+		var p = prog.flat[i];
+		txt += p.port + ": " + p.sec + " - " + p.value + "\n";
+	}	
+	win.editor.value = txt;
+	/*Storage.get("programs/" + fname + "?rnd=" + Math.random(), function(result){
 		win.editor.value = result;
-	});
+	});*/
 };
 
 ProgramEditor.Compile = function(){
