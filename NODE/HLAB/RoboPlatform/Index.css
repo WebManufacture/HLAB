@@ -108,6 +108,8 @@ body.busy #HeaderBar .menuitem
 .cells-manager{
 	width: 100%;
 	overflow-x: scroll;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
 }	
 .cells-manager .row{
 	margin: 0;
@@ -128,7 +130,7 @@ body.busy #HeaderBar .menuitem
 
 #CellField {
 	width: 100%;
-	height: 100%;
+	padding: 10px;
 }
 
 #CellField .row{
@@ -184,5 +186,30 @@ body.busy #HeaderBar .menuitem
 	border-left: solid 1px red;
 }
 
+#LineEditor{
+	width: 100%;
+	padding: 10px;
+}
 
+#LineEditor .row{
+	height: 40px;
+}
 
+#LineEditor .row.header{
+	background-color: #777;
+	color: white;
+	font-weight: bold;
+}
+
+#LineEditor .cell{
+	text-align: center;	
+	font-size: 10px;
+	line-height:40px;
+	height: 40px;
+	width : 40px;
+	border: solid 1px #eef;
+}
+
+#LineEditor .cell:hover{
+	border-color: red;				
+}

@@ -19,7 +19,7 @@ Uart = function(url){
 Inherit(Uart, Channel, {	
 	checkMessages : function(){
 		var obj = Net.GET(this.url, function(data){
-			self.emit("onconnect");
+			self.emit("onconnect", data);
 			self.OnReceive(data);			
 		}); 
 	},

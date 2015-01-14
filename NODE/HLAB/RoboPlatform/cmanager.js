@@ -4,30 +4,85 @@ CManager = {};
 CManager._mixin = {
 	InitElem : function(){
 		this.Fill();
-		var hrow = this.get("#row0");
-		hrow.add(".header");
-		var cells = hrow.all(".cell");
-		for (var i = 0; i < cells.length; i++){
-			cells[i].textContent = i;	
+		if (!this.is(".noheader")){
+			var hrow = this.get("#row0");
+			hrow.add(".header");
+			var cells = hrow.all(".cell");
+			for (var i = 0; i < cells.length; i++){
+				cells[i].textContent = i;
+				cells[i].add(".header-cell");
+			}
 		}
-		var cells = this.all(".cell[col='0']");
-		for (var i = 1; i < cells.length; i++){
-			cells[i].textContent = i ;	
-			cells[i].add(".gutter");
+		if (!this.is(".nogutter")){
+			var cells = this.all(".cell[col='0']");
+			for (var i = 1; i < cells.length; i++){
+				cells[i].textContent = i ;	
+				cells[i].add(".gutter");
+			}
 		}
 		this.emit("init");
 	},
 
 	Fill : function(){
-		this.all(".cell").del();
+		this.Clear();
 		for (var i = 0; i < this.Rows + 1; i++){
 			var row = this.CreateRow(i);
 		}
+	},
+	
+	Clear : function(){
+		this.all(".row").del();
+		this.all(".cell").del();
+	},
+	
+	SetFieldSize : function(cols, rows){
+		this.Clear();
+		this.Cols = cols;
+		this.Rows = rows;
+		if (this.CellSize){
+			var isize = ((this.CellSize) * (this.Cols + 1));
+			this.IDiv.set("@style", "width : " + isize + "px;");
+		}
+		else{
+			this.IDiv.set("@style", "width : 100%;");
+		}
+		this.InitElem();
+	},
+	
+	AddCols : function(count){
+		var hrow = this.get("#row0");
+		for(var i = this.Cols + 1; i < this.Cols + count;i++){
+			var hcell = hrow.add(this._initCell(i, 0, hrow));
+			hcell.add(".header");
+			hcell.textContent = i;
+			for (var r = 1; r <= this.Rows; r++){
+				var row = this.get("#row" + r);
+				var cell = row.add(this._initCell(i, r, row));
+			}
+		};
+		this.Cols += count;
+		if (this.CellSize){
+			var isize = ((this.CellSize) * (this.Cols + 1));
+			this.IDiv.set("@style", "width : " + isize + "px;");
+		}
+	},
+	
+	AddRow : function(){
+		var row = this.CreateRow(this.Rows + 1);
+		var fcell = row.get(".cell[col='0']");
+		this.Rows++;
+		fcell.textContent = this.Rows;	
+		fcell.add(".gutter");
+		return row;
 	},
 
 	CreateRow: function(rnum){
 		var row = this.IDiv.div(".row");
 		row.id = "row" + rnum;
+		row.number = rnum;
+		if (this.CellSize){
+			row.set("@style", "height : "+ this.CellSize + "px");			
+		}
 		for (var i = 0; i < this.Cols + 1; i++){
 			row.add(this._initCell(i, rnum, row));
 		}
@@ -43,29 +98,45 @@ CManager._mixin = {
 		cell.col = col;
 		cell.value = 0;
 		cell.draggable = true;
+		if (this.CellSize){
+			cell.set("@style", "width : " + this.CellSize + "px; height : "+ this.CellSize + "px");			
+		}
+		
+		if (window.Drag){
+			Drag.MakeDraggable(cell);
+		}
 		var table = this;
-		cell.addEventListener("click", function(event){
-			table._onCellClick.call(this, event, table);
-			table.emit("cell_click", this, event);
-		});	
-		cell.addEventListener("mouseenter", function(event){
-			table._onCellEnter.call(this, event, table);
-			table.emit("cell_enter", this, event);
-		});
-		cell.addEventListener("mouseover", function(event){
-			table.emit("cell_hover", this, event);
-		});
-		cell.addEventListener("dragenter", function(event){
-			table._onCellEnter.call(this, event, table);
-			table.emit("cell_over", this, event);
-		});
-		cell.addEventListener("onmouseleave", function(event){
-			table._onCellLeave.call(this, event, table);
-		});
+		
 		if (col == 0 && row > 0){
+			if (col <= 0){
+				cell.addEventListener("click", function(event){
+					table._selectRow.call(this, table, rowElem);
+				});
+			}
+			if (row <= 0){
+				cell.addEventListener("click", function(event){
+					table.emit("col_selection", this);
+				});
+			}
+		}
+		else{
 			cell.addEventListener("click", function(event){
-				table._selectRow.call(this, table, rowElem);
+				table.emit("cell_click", this, event);
+			});	
+			cell.addEventListener("mouseenter", function(event){
+				table._onCellEnter.call(this, event, table);
+				table.emit("cell_enter", this, event);
 			});
+			cell.addEventListener("mouseover", function(event){
+				table.emit("cell_hover", this, event);
+			});
+			cell.addEventListener("dragenter", function(event){
+				table._onCellEnter.call(this, event, table);
+				table.emit("cell_over", this, event);
+			});
+			cell.addEventListener("onmouseleave", function(event){
+				table._onCellLeave.call(this, event, table);
+			});			
 		}
 		return cell;
 	},
@@ -85,6 +156,7 @@ CManager._mixin = {
 		var row = this.get('#row' + rowNum);
 		if (row){
 			row.add(".selected");
+			//this.emit("row_selected", row);
 		}
 	},
 	
@@ -92,6 +164,7 @@ CManager._mixin = {
 		var row = this.get('#row' + rowNum);
 		if (row){
 			row.del(".selected");
+			//this.emit("row_unselected", row);
 		}
 	},
 	
@@ -104,7 +177,7 @@ CManager._mixin = {
 	},
 	
 	_selectRow : function(table, row){
-		WS.ToggleClass(row,"selected");	
+		WS.ToggleClass(row, "selected");	
 		if (row.is(".selected")){
 			table.emit("row_selected", row);
 		}
@@ -113,18 +186,6 @@ CManager._mixin = {
 		}
 	},
 	
-	_onCellClick : function(event, table){
-		if (this.col <= 0){
-			table.emit("gutter_click", this);
-			return;
-		}
-		if (this.row <= 0){
-			table.emit("header_click", this);
-			return;
-		}
-	},
-
-
 	_onCellEnter : function(event, table){
 		if (this.col <= 0) return;
 		if (this.row == 0){		
@@ -165,8 +226,6 @@ CManager.Init = function(table, options){
 	}
 
 	table.IDiv = table.div(".internal");
-	var isize = ((table.CellSize) * (table.Cols + 1));
-	table.IDiv.set("@style", "width : " + isize + "px;");
 	table.add(".initialized");
 	for (var item in table){
 		if (item.indexOf("on") == 0 && typeof(table[item]) == 'function'){

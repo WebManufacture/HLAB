@@ -33,6 +33,7 @@ function Process(req, res, url, host, port){
 	try{
 		res.setHeader("Content-Type", "text/plain; charset=utf-8");
 		var dirName = Path.basename(req.pathName);
+		console.log("Compiling " + req.pathName);
 		var cp = ChildProcess.execFile("C:\\Node\\HLAB\\Build.cmd",[dirName], null, function(error, stdout, stderr){
 		  try{
 			  if (error){
