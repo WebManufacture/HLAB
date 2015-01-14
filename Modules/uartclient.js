@@ -2,6 +2,7 @@ UartManager = function(url, channelName){
 	if (!url) url = "ws://localhost:5000";
 	this.socketUrl = url;
 	
+	UartManager.Current = this;
 	
 	var self = this;
 	
@@ -69,7 +70,8 @@ UartManager.prototype = {
 	},
 
 	_onError : function(){
-		setTimeout(CreateClosure(this._initSocket, this), 3000);
+		Channels.emit(this.channelName + ".error");
+		//setTimeout(CreateClosure(this._initSocket, this), 3000);
 	}
 }
 
