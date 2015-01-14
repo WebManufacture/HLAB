@@ -1,0 +1,13 @@
+<div id='Response'>
+	<h2>Error Code: <span id='ErrCode'>{ERRCODE}<span></h2>
+	<hr />
+	<PRE id='ErrOut'>{ERROUT}</PRE>
+	<hr />
+	<PRE id='StdOut'>{STDOUT}</PRE>
+	<hr />
+	<PRE id='ObjFiles'>{OBJFILES}</PRE>
+	<hr />
+	<PRE id='LstFiles'>{LISTFILES}</PRE>
+	<hr />
+	<PRE id='ErrFiles'>{ERRORFILES}</PRE>
+</div>
