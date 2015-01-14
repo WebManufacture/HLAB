@@ -33,13 +33,14 @@ processCounter = 0;
 function Process(req, res, url, host, port){
 		
 		try{
+			/*
 			if (processCounter > 0){
 				setTimeout(function(){
 					Process(req, res, url, host, port);
 				}, 1000);
 				console.log("BUSY: " + processCounter);
 				return;
-			}
+			}*/
 			var basePath = Path.resolve("HLAB");
 			var projectPath = url.pathname;
 			if (port && port != "80"){
@@ -116,15 +117,15 @@ function CompileProject(req, res, basePath, projectPath){
 	ClearDir(projectPath + "\\result");
 	ClearDir(projectPath + "\\errors");				
 	processCounter++;
-	var cp = ChildProcess.spawn(basePath + "\\Compile.cmd",[dirName],{ stdio: ['ignore', 'pipe', 'pipe'] });
+	var cp = ChildProcess.spawn(basePath + "\\Compile.cmd",[dirName],{ stdio: ['ignore', 'ignore', 'ignore'] });
 	var errStr = "";
 	var logStr = "";
-	cp.stderr.on('data', function (data) {
+	/*cp.stderr.on('data', function (data) {
 		errStr += data;
 	});
 	cp.stdout.on('data', function (data) {
 		logStr += data;
-	});
+	});*/
 	cp.on('close', function (code) {
 		processCounter--;
 		var tpl = RespTemplate;
@@ -163,7 +164,7 @@ function CompileProject(req, res, basePath, projectPath){
 				res.finish(200, tpl); 
 			}
 			catch (err){
-				console.log(err);
+				console.error(err);
 				res.statusCode = 500;
 				res.end(err + "");
 			}
@@ -180,15 +181,15 @@ function CompileFile(req, res, basePath, projectPath){
 	console.log("Compiling file " + fileName);
 	processCounter++;	
 	
-	var cp = ChildProcess.spawn(basePath + "\\CompileFile.cmd",[file],{ stdio: ['ignore', 'pipe', 'pipe'] });
+	var cp = ChildProcess.spawn(basePath + "\\CompileFile.cmd",[file],{ stdio: ['ignore', 'ignore', 'ignore'] });
 	var errStr = "";
 	var logStr = "";
-	cp.stderr.on('data', function (data) {
+	/*cp.stderr.on('data', function (data) {
 		errStr += data;
 	});
 	cp.stdout.on('data', function (data) {
 		logStr += data;
-	});
+	});*/
 	cp.on('close', function (code) {
 			try{				
 				console.log('Exec code: ' + code);
@@ -223,7 +224,7 @@ function CompileFile(req, res, basePath, projectPath){
 				res.finish(200, tpl); 
 			}
 			catch (err){
-				console.log(err);
+				console.error(err);
 				res.statusCode = 500;
 				res.end(err + "");
 			}
@@ -249,61 +250,63 @@ function ProcessLink(req, res, basePath, projectPath){
 			fs.mkdirSync(projectPath + "\\result");
 			
 		fs.readdir(projectPath + "\\", function(err, files){
-		try{
-			if (err){
-				res.finish(500, "readdir " + dirName + " error " + err);
-				console.log("readdir " + dirName + " error " + err);
-				return;
-			}
-			var lkf = "";
-			for (var i = 0; i < files.length; i++){
-				if (Path.extname(files[i]) == ".c" && files[i] != "interrupt_vectors.c"){
-					lkf += "result\\" + Path.basename(files[i], ".c") + ".o\n";
-				}
-			}				
-			lkf = Template.replace("{OBJECTFILES}", lkf + "");
-			fs.writeFileSync(projectPath + "\\" + dirName + ".lkf", lkf);
 			
 			
 			processCounter++;
-			var cp = ChildProcess.spawn(basePath + "\\Link.cmd",[dirName],{ stdio: ['ignore', 'pipe', 'pipe'] });
-			var errStr = "";
-			var logStr = "";
-			cp.stderr.on('data', function (data) {
-				errStr += data;
-			});
-			cp.stdout.on('data', function (data) {
-				logStr += data;
-			});
-			cp.on('close', function (code) {
+			try{
+				if (err){
+					res.finish(500, "readdir " + dirName + " error " + err);
+					console.log("readdir " + dirName + " error " + err);
+					return;
+				}
+				var lkf = "";
+				for (var i = 0; i < files.length; i++){
+					if (Path.extname(files[i]) == ".c" && files[i] != "interrupt_vectors.c"){
+						lkf += "result\\" + Path.basename(files[i], ".c") + ".o\n";
+					}
+				}				
+				lkf = Template.replace("{OBJECTFILES}", lkf + "");
+				fs.writeFileSync(projectPath + "\\" + dirName + ".lkf", lkf);
+
+				var cp = ChildProcess.spawn(basePath + "\\Link.cmd",[dirName],{ stdio: ['ignore', 'ignore', 'ignore'] });
+				var errStr = "";
+				var logStr = "";
+				/*cp.stderr.on('data', function (data) {
+					errStr += data;
+				});
+				cp.stdout.on('data', function (data) {
+					logStr += data;
+				});*/
+				cp.on('close', function (code) {
+					processCounter--;
+					console.log('Exec code: ' + code);
+					var tpl = RespTemplate;
+					tpl = tpl.replace("{ERRCODE}", code);
+					tpl = tpl.replace("{STDOUT}", logStr);
+					tpl = tpl.replace("{OBJFILES}", "");
+					if (fs.existsSync(projectPath + "\\result\\" + dirName + ".map")){
+						tpl = tpl.replace("{LISTFILES}", fs.readFileSync(projectPath + "\\result\\" + dirName + ".map") + "");
+					}
+					else{
+						tpl = tpl.replace("{LISTFILES}", "");
+					}
+					if (fs.existsSync(projectPath + "\\errors\\" + dirName + ".merr")){
+						tpl = tpl.replace("{ERRORFILES}","errors\\" + dirName + ".merr");
+						tpl = tpl.replace("{ERROUT}",  fs.readFileSync(projectPath + "\\errors\\" + dirName + ".merr") + "");
+					}
+					else{
+						tpl = tpl.replace("{ERRORFILES}", "");
+						tpl = tpl.replace("{ERROUT}", errStr);
+					}			
+					res.finish(200, tpl); 			
+				});
+			}
+			catch (err){
+				console.error(err);
+				res.statusCode = 500;
+				res.end(err + "");
 				processCounter--;
-				console.log('Exec code: ' + code);
-				var tpl = RespTemplate;
-				tpl = tpl.replace("{ERRCODE}", code);
-				tpl = tpl.replace("{STDOUT}", logStr);
-				tpl = tpl.replace("{OBJFILES}", "");
-				if (fs.existsSync(projectPath + "\\result\\" + dirName + ".map")){
-					tpl = tpl.replace("{LISTFILES}", fs.readFileSync(projectPath + "\\result\\" + dirName + ".map") + "");
-				}
-				else{
-					tpl = tpl.replace("{LISTFILES}", "");
-				}
-				if (fs.existsSync(projectPath + "\\errors\\" + dirName + ".merr")){
-					tpl = tpl.replace("{ERRORFILES}","errors\\" + dirName + ".merr");
-					tpl = tpl.replace("{ERROUT}",  fs.readFileSync(projectPath + "\\errors\\" + dirName + ".merr") + "");
-				}
-				else{
-					tpl = tpl.replace("{ERRORFILES}", "");
-					tpl = tpl.replace("{ERROUT}", errStr);
-				}			
-				res.finish(200, tpl); 			
-			});
-		}
-		catch (err){
-			console.log(err);
-			res.statusCode = 500;
-			res.end(err + "");
-		}
+			}						
 	});
 	
 	if (fs.existsSync(projectPath + "\\errors\\" + dirName + ".merr"))
