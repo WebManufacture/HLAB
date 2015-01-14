@@ -32,9 +32,9 @@ function finish(sc, rs){
 function Process(req, res, url, host, port){
 	try{
 		res.setHeader("Content-Type", "text/plain; charset=utf-8");
-		var dirName = Path.basename(Path.resolve("C:\\Node\\HLAB\\STM8" + url.path));
+		var dirName = Path.basename(Path.resolve(".\\HLAB\\STM8" + url.path));
 		console.log("Compiling " + dirName);
-		var cp = ChildProcess.execFile("C:\\Node\\HLAB\\Build.cmd",[dirName], null, function(error, stdout, stderr){
+		var cp = ChildProcess.execFile(Path.resolve(".\\HLAB\\Build.cmd"),[dirName], null, function(error, stdout, stderr){
 		  try{
 			  if (error){
 				  res.finish(500, error + ''); 
