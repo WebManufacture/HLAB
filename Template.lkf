@@ -30,7 +30,7 @@ crtsi0.sm8
 
 # Object files list
 #<BEGIN OBJECT_FILES>
-
+{OBJECTFILES}
 #<END OBJECT_FILES>
 
 # Library list
