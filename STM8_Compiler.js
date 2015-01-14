@@ -24,6 +24,8 @@ function CreateServer(Port){
 	});
 }
 
+processCounter = 0;
+
 function finish(sc, rs){
 	this.statusCode = sc;
 	this.end(rs);
@@ -31,29 +33,42 @@ function finish(sc, rs){
 
 function Process(req, res, url, host, port){
 	try{
+		if (processCounter > 0){
+			setTimeout(function(){
+				Process(req, res, url, host, port);
+			}, 1000);
+			console.log("BUSY: " + processCounter);
+			return;
+		}
 		res.setHeader("Content-Type", "text/plain; charset=utf-8");
-		var dirName = Path.basename(Path.resolve(".\\HLAB\\STM8" + url.path));
+		var dirName = Path.basename(Path.resolve("C:\\Node\\HLAB\\STM8" + url.path));
 		console.log("Compiling " + dirName);
-		var cp = ChildProcess.execFile(Path.resolve(".\\HLAB\\Build.cmd"),[dirName], null, function(error, stdout, stderr){
-		  try{
-			  if (error){
-				  res.finish(500, error + ''); 
-				  console.log('exec error: ' + error);
-			  }
-			  console.log('stdout: ' + stdout);
-			  console.log('stderr: ' + stderr);
-			  res.finish(200, stdout + ''); 
-		  }
-		  catch (err){
-			res.statusCode = 500;
-			res.end(err + "");
-		  }
-	   });
-   }
-   catch (err){
+		processCounter++;
+		var cp = ChildProcess.spawn("C:\\Node\\HLAB\\Build.cmd",[dirName],{ stdio: ['ignore', 'pipe', 'pipe'] });
+		var errStr = "";
+		var logStr = "";
+		cp.stderr.on('data', function (data) {
+			errStr += data;
+		});
+		cp.stdout.on('data', function (data) {
+			logStr += data;
+		});
+		cp.on('close', function (code) {
+			processCounter--;
+			try{
+				console.log('Exec code: ' + code);
+				res.finish(200, "ERRCODE:" + code + "\nSTDERR:\n" + errStr + 'STDOUT:\n' + logStr); 
+			}
+			catch (err){
+				res.statusCode = 500;
+				res.end(err + "");
+			}
+		});
+	}
+	catch (err){
 		console.error("ERR IN PROCESS:");
 		console.error(err);
-   }
+	}
 }
 
 CreateServer(process.argv[2]);
