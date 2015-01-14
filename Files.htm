@@ -114,7 +114,7 @@
 		};
 		
 		FS.GetActiveFiles = function() {
-			return FS.Tree.all(".file.selected");
+			return FS.Tree.all(".selected");
 		};
 		
 		FS.LoadTreeComplete = function(files, status) {
@@ -247,10 +247,6 @@
 				this.add(".selected");
 				return;
 			}
-			if (event.ctrlKey) {				
-				FS.LoadFile(this);
-				return;
-			}
 			//this.toggle("selected");
 			FS._toggle(this, 'selected');
 		};
@@ -310,12 +306,7 @@
 		};
 		
 		FS.FileActivate = function() {
-			if (location.pathname == "/"){
-				window.open(location + this.fileName);
-			}
-			else{
-				window.open(location + "/" + this.fileName);
-			}
+			FS.LoadFile(this);
 			this.del('.selected');
 		};
 		
@@ -385,9 +376,12 @@
 			document.title = config.title;
 		};
 		
-		FS.CompileProject = function() {
-			Net.get("http://hlab.web-manufacture.net:8099" + FS.CurrentDir, function(result){
+		FS.BuildProject = function() {
+			Net.get("http://hlab.web-manufacture.net:8099" + FS.CurrentDir + "?action=compile", function(result){
 				console.log(result);
+				Net.get("http://hlab.web-manufacture.net:8099" + FS.CurrentDir + "?action=link", function(result){
+					console.log(result);
+				});
 			});		
 		};
 		
@@ -765,13 +759,17 @@
 			Создать проект
 		</div>
 		
-		<div class='menuitem' id='compile-project-button' icon="http://system.web-manufacture.net/Images/emblem-system.png" onclick="FS.CompileProject()">
+		<div class='menuitem' id='compile-project-button' icon="http://system.web-manufacture.net/Images/emblem-system.png" onclick="FS.BuildProject()">
 			Собрать
 		</div>
 	</div> 
 	
 	<div id="Notify" class=''>
 		<div class="event info">Вы можете перетащить сюда файлы для загрузки в данную папку.</div>
+		<br/>
+		<div class="event info">Для того чтобы добавить файл, введите его имя в поле в верхнем левом углу и нажмите "Создать"</div>
+		<br/>
+		<div class="event info">Чтобы открыть файл, дважды кликните по нему</div>
 	</div>
 	<div id="files-block" class="files-block" title="File System">
 		<div id='LoadingMask'>
