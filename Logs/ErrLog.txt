@@ -1,0 +1,37 @@
+------------------------------------------------------------------
+Wed Jan 14 2015 18:03:59 GMT+0400 (Russian Standard Time)
+"%COSMIC%\clnk" -l"%COSMIC%\Lib" -e"errors\platformbase.merr" -sl  -o"result\platformbase.sm8" -m"result\platformbase.map" platformbase.lkf 
+"%COSMIC%\cvdwarf" "result\platformbase.sm8" 
+
+------------------------------------------------------------------
+Wed Jan 14 2015 18:04:54 GMT+0400 (Russian Standard Time)
+"%COSMIC%\cxstm8" -i"%COSMIC%\Hstm8" -i"%ST_TOOL%\include" +mods0 +debug -e -pxp -l -pp *.c
+------------------------------------------------------------------
+Wed Jan 14 2015 18:04:54 GMT+0400 (Russian Standard Time)
+"%COSMIC%\clnk" -l"%COSMIC%\Lib" -e"errors\platformbase.merr" -sl  -o"result\platformbase.sm8" -m"result\platformbase.map" platformbase.lkf 
+"%COSMIC%\cvdwarf" "result\platformbase.sm8" 
+
+------------------------------------------------------------------
+Wed Jan 14 2015 18:05:46 GMT+0400 (Russian Standard Time)
+cmd "%COSMIC%\cxstm8" -i"%COSMIC%\Hstm8" -i"%ST_TOOL%\include" +mods0 +debug -e -pxp -l -pp *.c
+------------------------------------------------------------------
+Wed Jan 14 2015 18:05:46 GMT+0400 (Russian Standard Time)
+cmd "%COSMIC%\clnk" -l"%COSMIC%\Lib" -e"errors\platformbase.merr" -sl  -o"result\platformbase.sm8" -m"result\platformbase.map" platformbase.lkf 
+cmd "%COSMIC%\cvdwarf" "result\platformbase.sm8" 
+
+------------------------------------------------------------------
+Wed Jan 14 2015 18:08:46 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:08:46 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:10:44 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:10:44 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:10:49 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:10:49 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:11:07 GMT+0400 (Russian Standard Time)
+------------------------------------------------------------------
+Wed Jan 14 2015 18:11:07 GMT+0400 (Russian Standard Time)
