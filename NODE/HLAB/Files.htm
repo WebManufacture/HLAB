@@ -44,20 +44,40 @@
 		
 		Notify = {};
 		
-		Notify.Show = Notify.info = Notify.Info = function (message) {
+		Notify.Show = function (message, cls) {
 			var nf = DOM("#Notify");
-			var ev = nf.div(".event.first", (new Date()).formatTime() + " " + message);
+			if (!cls) cls = "";
+			var ev = nf.tag("pre", ".event" + cls, (new Date()).formatTime() + " " + message);
 			nf.show();
 			nf.ins(ev);
 			Notify.setTimeout();
+			return ev;
 		};
 		
-		Notify.Error = function (error) {
+		Notify.Error = function (error, cls) {
 			var nf = DOM("#Notify");
-			var ev = nf.div(".event.error.first", (new Date()).formatTime() + " " + error);
+			if (!cls) cls = "";
+			var ev = nf.tag("pre",".event.error" + cls, (new Date()).formatTime() + " " + error);
 			nf.show();
 			nf.ins(ev);
 			Notify.setTimeout();
+			return ev;
+		};
+		
+		Notify.Line = Notify.Info = function (txt, cls) {
+			var nf = DOM("#Notify");
+			if (!cls) cls = "";
+			var ev = nf.tag("pre",".info" + cls);
+			ev.textContent = txt;
+			nf.show();
+			nf.ins(ev);
+			Notify.setTimeout();
+			return ev;
+		};
+		
+		Notify.Clear = function (error) {
+			var nf = DOM("#Notify");
+			nf.clear();
 		};
 		
 		Notify.setTimeout = function () {
@@ -377,10 +397,68 @@
 		};
 		
 		FS.BuildProject = function() {
-			Net.get("http://hlab.web-manufacture.net:8099" + FS.CurrentDir + "?action=compile", function(result){
-				console.log(result);
-				Net.get("http://hlab.web-manufacture.net:8099" + FS.CurrentDir + "?action=link", function(result){
-					console.log(result);
+			Notify.Clear();
+			LoadingMask.show();
+			console.log("Compiling:" + FS.CurrentDir);
+			CompilerHelper.Compile(FS.CurrentDir, function(result, obj){
+				console.log(obj);
+				if (obj.errCode > 0){
+					Notify.Error("Compiling errors:");
+					for (var i = 0; i < obj.errFiles.length; i++){
+						if (obj.errFiles[i]){
+							var line = Notify.Line(obj.errFiles[i], ".link");
+							line.set("@url", "/" + obj.errFiles[i]);
+							line.onclick = (function(){
+								Net.get(this.get("@url"), null, function(result){
+									Notify.Info(result);
+								});
+							})
+						}
+					}
+				}
+				else{						
+					Notify.Show("Compiled successfully!", ".positive");
+					for (var i = 0; i < obj.lstFiles.length; i++){
+						if (obj.lstFiles[i]){
+							var line = Notify.Line(obj.lstFiles[i], ".link");
+							line.set("@url", "/" + obj.lstFiles[i]);
+							line.onclick = (function(){
+								window.open(this.get("@url"));
+							});
+						}
+					}
+				}
+				LoadingMask.hide();
+				LoadingMask.show();
+				console.log("Linking:" + FS.CurrentDir);
+				CompilerHelper.Link(FS.CurrentDir, function(result, obj){
+					console.log(obj);
+					if (obj.errCode > 0){
+						Notify.Error("Linking errors:");
+						Notify.Line(obj.errOut);
+					}
+					else{						
+						Notify.Show("Linked successfully!", ".positive");
+						for (var i = 0; i < obj.lstFiles.length; i++){
+							if (obj.lstFiles[i]){
+								var line = Notify.Line(obj.lstFiles[i], ".link");
+								line.set("@url", "/" + obj.lstFiles[i]);
+								line.onclick = (function(){
+									window.open(this.get("@url"));
+								})
+							}
+						}
+						for (var i = 0; i < obj.objFiles.length; i++){
+							if (obj.objFiles[i]){
+								var line = Notify.Line(obj.objFiles[i], ".link");
+								line.set("@url", "/" + obj.lstFiles[i]);
+								line.onclick = (function(){
+									window.open(this.get("@url"));
+								});
+							}
+						}
+					}
+					LoadingMask.hide();
 				});
 			});		
 		};
@@ -407,80 +485,7 @@
 
 				}
 			};
-			
-			//var dialog = W.get(".edit-name-dialog");
-			//dialog.show();
-			//dialog.onapply = FileSystem.NewDocApply;
 		};
-		
-		
-		FS.NewDocApply = function(name) {
-			if (name.length > 0) {
-				X.ContentGet(escape(name), "new", FileSystem.NewDocCreated);
-			}
-		};
-		
-		
-		function UrlUpLoad() {
-			var dialog = W.get(".edit-name-dialog");
-			dialog.show();
-			dialog.onapply = FileSystem.OnUrlUpLoad;
-		}
-		
-		FS.OnUrlUpLoad = function(result) {
-			var url = result;
-			if (url.length > 0) {
-				X.ContentGet(escape(url), "urlload", FileSystem.NewDocCreated);
-			}
-		}
-			
-			function CopyFile() {
-				var file = GetActiveFile();
-				var url = file.attr("name");
-				url = GetProxiedUrl(escape(url), "filecopy");
-				$.get(url, null, NewFileReturned);
-			}
-		
-		function OnUploadFile() {
-			$("#LoadDocDialog")[0].OnApply = OnUploadApply;
-			$("#LoadDocDialog").show();
-			
-			var fileInput = document.getElementById("fileUploader");
-			//fileInput.
-		}
-		
-		function OnUploadApply() {
-			$("#LoadDocDialog").hide();
-			var files = document.getElementById("fileUploader").files;
-			// object for allowed media types
-			var accept = {
-				binary: ["image/png", "image/jpeg"],
-				text: ["text/plain", "text/javascript", "text/css", "application/xml", "text/html"]
-			};
-			var file;
-			for (var i = 0; i < files.length; i++) {
-				
-				file = files[i];
-				if (file !== null) {
-					
-					var xhr = new XMLHttpRequest();
-					xhr.open("POST", GetProxiedUrl(file.fileName, "save"));
-					xhr.overrideMimeType(file.mediaType);
-					xhr.onload = NewFileReturned;
-					if (accept.binary.indexOf(file.type) > -1) {
-						
-						xhr.sendAsBinary(file.getAsBinary());
-						continue;
-					}
-					if (accept.binary.indexOf(file.type) > -1) {
-						xhr.sendAsText(file.getAsText());
-						continue;
-					}
-				}
-			}
-			$("#fileUploader").val("");
-		}
-		
 		
 		WS.DOMload(FS.Init); 
 		
@@ -491,24 +496,35 @@
 		
 		#Notify{
 			background-color: white;
-			border: 1px solid navy;
-			border-radius: 10px;
+			border-left: 1px solid gray;
 			cursor: default;
 			font-size: 12px;
 			height: 86%;
-			opacity: 0.5;
 			overflow: hidden;
 			padding: 7px;
 			position: fixed;
-			right: 1%;
+			right: 0;
 			text-align: left;
-			top: 10%;
-			width: 8%;
+			top: 12%;
+			width: 45%;
 			z-index: 20;
+		}
+		
+		#Notify .event.positive{
+			color: green;
 		}
 		
 		#Notify .event{
 			color: #333;
+		}
+		
+		#Notify .info{
+			color: #333;
+		}
+		
+		#Notify .link:hover{
+			text-decoration: underline;
+			cursor: pointer;
 		}
 		
 		#Notify .event.first{
@@ -633,12 +649,12 @@
     		background-repeat: no-repeat;
 			
 		}
-		
+		/*
 		.dir[name="errors"],
 		.dir[name="result"]
 		{
 			display: none;
-		}
+		}*/
 		
 		.file.json[name="project"]
 		{
@@ -734,6 +750,7 @@
 <body>
 	<include url='http://services.web-manufacture.net/UI/toolbars.htm'></include>
 	<include url='http://services.web-manufacture.net/Authentication/Authentication.htm'></include>
+	<include url='http://klab.web-manufacture.net/HLAB/modules/CompilerHelper.js'></include>
 	<div class='toolbar' id='HeaderBar'>
 		<div id='FilterBlock'>
 			<div class='title'>Фильтр и поиск:</div>
@@ -770,6 +787,8 @@
 		<div class="event info">Для того чтобы добавить файл, введите его имя в поле в верхнем левом углу и нажмите "Создать"</div>
 		<br/>
 		<div class="event info">Чтобы открыть файл, дважды кликните по нему</div>
+		<br/>
+		<div class="event info">Скомпилировать проект, можно кнопочкой "Собрать", вверху</div>
 	</div>
 	<div id="files-block" class="files-block" title="File System">
 		<div id='LoadingMask'>

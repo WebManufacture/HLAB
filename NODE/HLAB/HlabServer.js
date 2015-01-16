@@ -75,7 +75,16 @@ KLabServer = function(config, router){
 					   return;
 				   }
 				   if (stat.isFile()){
-						
+					   if (Path.extname(path) == ".sm8" || Path.extname(path) == ".s19" || Path.extname(path) == ".elf"){
+						    context.res.setHeader("Content-Type", "application/octet-stream");
+						    fs.readFile(path, "binary", function(err, result){   
+							   if (err){
+								   context.finish(500, "Error while reading file " + err);
+								   return;
+							   }		
+							   context.finish(200, result);
+						   });
+					   }
 				   }
 				   context.continue();
 			   });

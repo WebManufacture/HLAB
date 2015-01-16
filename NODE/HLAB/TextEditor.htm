@@ -40,20 +40,28 @@
 
 			Notify = {};
 
-			Notify.Show = function(message) {
+			Notify.Show = Notify.info = Notify.Info = function (message, cls) {
 				var nf = DOM("#Notify");
-				var ev = nf.div(".event.first", (new Date()).formatTime() + " " + message);
+				if (!cls) cls ="";
+				var ev = nf.tag("pre", ".event.first" + cls, (new Date()).formatTime() + " " + message);
 				nf.show();
 				nf.ins(ev);
 				Notify.setTimeout();
+				return ev;
 			};
 
-			Notify.Error = function(error) {
+			Notify.Error = function (error) {
 				var nf = DOM("#Notify");
-				var ev = nf.div(".event.error.first", (new Date()).formatTime() + " " + error);
+				var ev = nf.tag("pre",".event.error.first", (new Date()).formatTime() + " " + error);
 				nf.show();
 				nf.ins(ev);
 				Notify.setTimeout();
+				return ev;
+			};
+			
+			Notify.Clear = function(error) {
+				var nf = DOM("#Notify");
+				nf.clear();
 			};
 
 			Notify.setTimeout = function() {
@@ -66,6 +74,16 @@
 			Notify.clearFirst = function() {
 				DOM.all("#Notify .event.first").del(".first");
 			};
+			
+			
+		Notify.Line = Notify.Info = function (txt) {
+			var nf = DOM("#Notify");
+			var ev = nf.tag("pre",".event", txt);
+			nf.show();
+			nf.ins(ev);
+			Notify.setTimeout();
+			return ev;
+		};
 
 			function XH() {
 				var xmlhttp;
@@ -413,23 +431,15 @@
 			};
 
 			Editor.RunFile = function() {
-				if (Request.Params.url) {
-					window.open(Request.GetUrl(Request.Params.url));
-					return;
-				}
-				if (Request.Params.file){
-					var url = Request.Params.file;
-					if (Request.Params.SystemPath) {
-						url = Request.Params.SystemPath + "/" + url;
+				Notify.Clear();
+				CompilerHelper.Compile(location.pathname, function(result, obj){
+					if (obj.errCode > 0){
+						Notify.Error("Errors in file: \n" + obj.errOut);
 					}
-					if (Request.Params.UserDomain) {
-						url = "http://" + Request.Params.UserDomain + "/" + url;
+					else{						
+						Notify.Show("Compiled successfully!");
 					}
-					window.open(url);
-				}
-				var url = new Url(window.location);
-				url.search = "";
-				window.open(url);
+				});
 			};
 
 			Editor.OpenLogWindow = function() {
@@ -562,6 +572,7 @@
 				font-size: 14px;
 				font-family: monospace;
 				height: 100%;
+				width : 78%;
 			}
 			.CodeMirror-scroll
 			{
@@ -626,6 +637,7 @@
 			{
 				background-color: red;
 			}
+			
 			#Notify
 			{
 				background-color: white;
@@ -633,18 +645,22 @@
 				border-radius: 10px 10px 10px 10px;
 				cursor: default;
 				font-size: 16px;
-				height: 300px;
+				height: 86%;
 				text-align: left;
-				width: 8%;
-				opacity: 0.5;
+				width: 18%;
 				position: fixed;
-				top: 1%;
+				top: 5%;
 				right: 1%;
 				z-index: 20;
 				padding: 7px;
 				font-size: 12px;
 				overflow: hidden;
 			}
+			
+			#Notify .event.positive{
+				color: green;
+			}
+			
 			#Notify .event
 			{
 				color: #333;
@@ -680,8 +696,15 @@
 		</style>
 	</head>
 	<body>
+		
+		<include url='http://services.web-manufacture.net/ui/Toolbars.htm'></include>
+		<include url='http://services.web-manufacture.net/ui/FrameWin.htm'></include>
+		<include url='http://klab.web-manufacture.net/HLAB/Modules/CompilerHelper.js'></include>
+		
 		<div id='Notify'>
 		</div>
+		
+		
 		<div id='hkHint' class='invisible' onclick="this.hide();">
 			<h2>
 				Список новых фишек</h2>
@@ -726,8 +749,6 @@
 				<span class='key-combination'>Ctrl + Пробел </span>Автодополнение (в доработке)
 			</div>
 		</div>
-		<include url='http://services.web-manufacture.net/ui/Toolbars.htm'></include>
-		<include url='http://services.web-manufacture.net/ui/FrameWin.htm'></include>
 		<div id='Toolbar' class="header toolbar">
 			<div class="menuitem save" tooltip="Сохранить" icon="http://system.web-manufacture.net/Images/save-mini.png"
 				 onclick="Editor.SaveFile();" style="background-image: url(http://system.web-manufacture.net/Images/save-mini.png);
@@ -742,10 +763,6 @@
 												   background-position: 50% 50%; background-repeat: no-repeat no-repeat;">
 			</div>
 			<div class="separator">
-			</div>
-			<div class="menuitem color" style="background-size: 48px; background-image: url(http://system.web-manufacture.net/Images/color.png);
-											   background-position: 50% 50%; background-repeat: no-repeat no-repeat;" tooltip="Палитра"
-				 icon="http://system.web-manufacture.net/Images/color.png" onclick="if (window.CPalette) CPalette.Show(); else M.LoadModule('http://system.web-manufacture.net/ColorPalette.htm');">
 			</div>
 			<div class="separator">
 			</div>
