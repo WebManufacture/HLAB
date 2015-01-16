@@ -146,7 +146,7 @@ void UartSendSized(UartMessage message, uchar size){
 	}
 	
 #endif
-/*
+
 UART_RX_IRQHandler{
 	unsigned char val;
 	unsigned int index;
@@ -215,4 +215,4 @@ UART_TX_IRQHandler{
 		}
 	}
 	_asm("RIM");
-}*/
+}
