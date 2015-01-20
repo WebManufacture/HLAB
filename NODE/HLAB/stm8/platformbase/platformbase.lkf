@@ -30,13 +30,6 @@ crtsi0.sm8
 
 # Object files list
 #<BEGIN OBJECT_FILES>
-result\Events.o
-result\GeneralConfig.o
-result\interrupts.o
-result\Routing.o
-result\TinyDebug.o
-result\uart.o
-result\utils.o
 
 #<END OBJECT_FILES>
 
