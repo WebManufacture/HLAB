@@ -1,0 +1,107 @@
+
+
+/* */
+/* line 9, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#NavigationHeader {
+  background-color: #FFF;
+  background-position: 0 -51px;
+  background-repeat: repeat-x;
+  height: 62px;
+}
+
+/* line 17, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#NavigationHeader {
+  background: #FFF;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #FFF 0%, #ECECF0 50%, #FFF 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #FFF), color-stop(50%, #ECECF0), color-stop(100%, #FFF));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #FFF 0%, #ECECF0 50%, #FFF 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #FFF 0%, #ECECF0 50%, #FFF 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #FFF 0%, #ECECF0 50%, #FFF 100%);
+  /* IE10+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFF', endColorstr='#ECECF0',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 27, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#app-frame-logo {
+  position: relative;
+  float: left;
+  height: 50px;
+  width: 50px;
+  padding: 7px 10px 5px 10px;
+}
+/* line 33, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#app-frame-logo div {
+  background: url('images/header-s385aebb65e.png') 0 -123px no-repeat;
+  height: 50px;
+  width: 50px;
+}
+
+
+/* line 64, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#NavigationHeader .navbar-brand {
+  text-shadow: none;
+  font-family: Arial, sans-serif !important;
+  font-weight: normal !important;
+  font-size: 18px !important;
+  height: auto !important;
+  line-height: 22px;
+  margin: 0 !important;
+  color: #222222;
+}
+
+/* line 75, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#NavigationHeader .navbar-brand:hover {
+  color: red;
+}
+/* line 79, D:/FrontRange/Eng/SaaS/main/Platform/AppServer/css/sass/theme/group/_application-frame.scss */
+#NavigationHeader .navbar-brand:hover {
+  background: none !important;
+  border-width: 0 !important;
+}
+
+.x-border-layout-ct,
+.x-panel-body{
+	background-color: #F5F5F5;
+}
+
+.x-accordion-item .x-accordion-hd{
+	background-color: gray;
+	color: #F5F5F5;
+	border-top-color: gray;
+	padding: 4px 8px 5px 8px;
+}
+
+.x-accordion-item .x-accordion-body{
+	background-color: white;
+	border-right: solid 1px gray;
+}
+
+.x-accordion-hd .x-panel-header-text-container{
+	color: #F5F5F5;
+	font-family: Arial, sans-serif;
+	font-kerning: auto;
+	font-size: 13px;
+	font-stretch: normal;
+	font-style: normal;
+	font-variant: normal;
+	font-variant-ligatures: normal;
+	font-weight: normal;
+}
+
+.x-accordion-item .x-accordion-hd-sibling-expanded{
+	border-top-color: gray;
+}
+
+.x-accordion-item .x-accordion-hd:not(.x-collapsed){
+	border-top-color: red;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	border-top-style: solid;
+	border-top-width: 4px;
+}

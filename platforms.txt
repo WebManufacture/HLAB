@@ -1,0 +1,12 @@
+Black Swift (OpenWRT)
+http://habrahabr.ru/company/blackswift/blog/246673/
+
+Intel Edison (Nano)
+http://www.intel.com/content/www/us/en/do-it-yourself/edison.html
+
+VoCore: A coin-sized Linux computer with wifi
+https://www.indiegogo.com/projects/vocore-a-coin-sized-linux-computer-with-wifi
+
+Carambola-2 (OpenWRT, NANO, WIFI)
+http://www.8devices.com/carambola-2
+

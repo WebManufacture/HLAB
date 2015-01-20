@@ -13,25 +13,9 @@ HLabServer = function(config, router, logger){
 		this.noCollectData = true;
 		this.logger = logger = console;
 		this.AvailableConfigs = {};
-		var clients = this.ConnectedClients = {};
+		var clients = this.ConnectedPorts = {};
+		this.ConnectedClients = {}
 		var me = this;
-		var server = Net.createServer(function(client) { //'connection' listener
-			var clientId = (Math.random() + "").replace("0.", "");
-			logger.log('client connected: ' + clientId + " " + client.remoteAddress + ":" + client.remotePort);
-			clients[clientId] = client;
-			client.on('end', function() {
-				delete clients[clientId];
-				delete me.AvailableConfigs[clientId];
-				logger.log('client disconnected: ' + clientId);
-			});		
-			client.setEncoding('utf8');
-			client.once('data', function(cfg){
-				me.NetClientConnected(cfg, clientId)
-			});
-		});
-		server.listen(4000, function() { //'listening' listener
-			logger.log('NET Server bound: ' + 4000);
-		});
 
 		var filesRouter = Files(config, this);
 		router.for("Main","/>", {
@@ -200,28 +184,144 @@ HLabServer = function(config, router, logger){
 };
 
 HLabServer.prototype = {
+	Start : function(server){
+		var logger = this.logger;
+		var netClients = this.ConnectedPorts;
+		var clients = this.ConnectedClients;
+		var me = this;
+
+		var netServer = this.NetServer = Net.createServer(function(client) { //'connection' listener
+			try{
+				var clientId = (Math.random() + "").replace("0.", "");
+				netClients[clientId] = client;
+				logger.log('client connected: ' + clientId + " " + client.remoteAddress + ":" + client.remotePort);
+				client.on('error', function(err) {
+					logger.error(err);
+				});
+				client.on('end', function() {
+					try{
+						delete netClients[clientId];
+						delete me.AvailableConfigs[clientId];
+						logger.log('client disconnected: ' + clientId);
+					}
+					catch(err){
+						logger.error(err);
+					}
+				});		
+				client.setEncoding('utf8');
+				client.once('data', function(cfg){
+					me.NetClientConnected(cfg, clientId)
+				});
+			}
+			catch(err){
+				logger.log("HLAB>> Problem with a net socket:");
+				logger.error(err);
+			}
+		});
+		netServer.listen(4000, function() { //'listening' listener
+			logger.log('NET Server bound: ' + 4000);
+		});
+
+		this.SockServer = useSystem('socket.io').listen(4008, { log: false });
+		logger.log(">>>HLAB socket server: " + 4008);
+		this.SockServer.on('error', function(err){
+			logger.log(">>>HLAB socket server error: ");
+			logger.error(err);
+		});
+		this.SockServer.on('connection', function (socket) {
+			try{
+				var path = '/';
+				if (socket.namespace){
+					path += socket.namespace.name;
+				}
+				var nc = me.netClients[socket.namespace.name];
+				if (!nc){
+					socket.end("No net clients with id: " + socket.namespace.name);
+				}
+				var clientId = (Math.random() + "").replace("0.", "");
+				me.ConnectedClients[clientId] = socket;
+				socket.on('error', function (err) {
+					logger.log(">>>HLAB socket server error: " + path);
+					logger.error(err);
+				});
+				var handler = function(data, arg){
+					socket.emit('message', [data, arg]);
+				}			
+				Channels.on("/HLAB/COM_ROUTER" + path + ".from-uart-client", handler);		
+				socket.on('disconnect', function (socket) {
+					delete me.ConnectedClients[clientId];
+				});	
+				socket.on("message", function(message, data){
+					logger.log(message);
+					Channels.emit("/HLAB/COM_ROUTER" + path + ".to-uart-client", message);
+				});
+			}
+			catch(err){
+				logger.log("HLAB>> Problem with a WS client:");
+				logger.error(err);
+			}
+		});			
+	},
+
+	Stop : function(){			
+		this.logger.log("HLAB server stopping");
+		try{
+			var netClients = this.ConnectedPorts;
+			var clients = this.ConnectedClients;
+			for (var cid in clients){
+				if (clients[cid]){
+					clients[cid].end("Server stopping!");
+				}
+			}
+			for (var cid in netClients){
+				if (clients[cid]){
+					netClients[cid].end("Server stopping!");
+				}
+			}
+			if (this.SockServer){
+				this.SockServer.close();
+				this.SockServer = null;
+			}	
+			if (this.NetServer){
+				this.NetServer.close();
+				this.NetServer = null;
+			}			
+		}
+		catch(err){
+			this.logger.error("Error stopping HLAB server:");
+			this.logger.error(err);
+		}
+	},
+
+
 	NetClientConnected : function(cfg, cid){
 		try{
+			var me = this;
 			cfg = JSON.parse(cfg);			
-			var client = this.ConnectedClients[cid];
+			var client = this.ConnectedPorts[cid];
+			if (!client) {
+				this.logger.log("Unknown client: " + cid);
+				return;
+			}
 			this.logger.log("HLAB PORTS Avalable on " + client.remoteAddress);
-			this.logger.log(cfg.Serials);
+			this.logger.log(cfg);
 			var res = { };
-			var sr = cfg.Serials.split(',');
+			var sr = cfg.Serials;
 			for (var i = 0; i < sr.length; i++){
 				if (sr[i]) res[sr[i]] = null;
 			}
 			for (var i = 0; i < cfg.Configs.length; i++){
 				var line = cfg.Configs[i];
 				if (!res[line.PortName]) res[line.PortName] = line;
-				this.logger.log(line.PortName + " " + line.Speed);
+				this.logger.log(line.PortName + " " + line.Speed + " " + line.RxPacketType);
 			}			 
 			this.AvailableConfigs[cid] = {ServerId : cfg.ServerId, Ports : res, Addr : client.remoteAddress + ":" + client.remotePort};
 			client.on('data', function(data){
-				this.NetClientData(data, cid);
+				me.NetClientData(data, cid);
 			});
 		}
 		catch(err){
+			this.logger.log("Unknown client: " + cid);
 			this.logger.error(err);
 		}
 	},
@@ -230,6 +330,7 @@ HLabServer.prototype = {
 		try{			
 			this.logger.log(data);
 			data = JSON.parse(data);
+			Channels.emit("/HLAB/COM_ROUTER/" + cid + ".to-uart-client", data);
 		}
 		catch(err){
 			this.logger.error(err);
