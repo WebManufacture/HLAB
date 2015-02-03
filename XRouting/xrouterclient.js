@@ -1,8 +1,10 @@
 XRouter = function(url){
 	//if (!url) url = "ws://hlab.web-manufacture.net:4008";
-	if (!url) url = "localhost:5000";
-	wsUrl = "ws://" + url;
-	this.socketUrl = url;
+	
+	if (!url) url = "localhost";
+	this.localUrl = url;
+	this.httpUrl = "http://" + url + ":5001";
+	this.socketUrl = "ws://" + url + ":5000";
 	
 	XRouter.Current = this;
 	
@@ -15,32 +17,32 @@ XRouter = function(url){
 		},
 		set : function(value){
 			this._state = value;
-			Channels.emit(this.channelName + ".state", value);
 		}
 	});
 	
-	
-	this._initSocket();
-	
-	if (!channelName) channelName = "uart";
-	this.channelName = channelName;
-	if (Channels){
-		Channels.on(channelName + ".send", function(data){
-			self.send(data);
-		});
-	}
-	setInterval(function(){
-		Channels.emit(channelName + ".state", self.State);
-	}, 400)
+	XRouter._super.call(this);
 }
 
-XRouter.prototype = {
+Inherit(XRouter, Eventer, {
 	send : function(data){
 		this.socket.send(JSON.stringify(data));
 	},
 	
-	_initSocket : function(){
-		this.socket = new WebSocket(this.socketUrl);
+	getConfig : function(callback){
+		if (callback){
+			Net.GET(this.httpUrl, CreateClosure(callback, this));
+		}
+		else{
+			Net.GET(this.httpUrl, CreateClosure(this._configReceived, this));
+		}
+	},
+	
+	_configReceived : function(result){
+		this.fire("config", result);
+	},
+	
+	connect : function(port){
+		this.socket = new WebSocket(this.socketUrl + "/" + port);
 		this.socket.onopen = CreateClosure(this._onConnect, this);
 		this.socket.onclose = CreateClosure(this._onClose, this);
 		this.socket.onmessage = CreateClosure(this._onMessage, this);
@@ -49,10 +51,12 @@ XRouter.prototype = {
 
 	_onConnect : function(){
 		this.State = "connected";
+		this.fire("connect");
 	},
 	
 	_onClose : function(){
 		this.State = "closed";
+		this.fire("close");
 	},
 
 	_onMessage : function(event){
@@ -72,8 +76,7 @@ XRouter.prototype = {
 	},
 
 	_onError : function(){
-		Channels.emit(this.channelName + ".error");
-		//setTimeout(CreateClosure(this._initSocket, this), 3000);
+		this.emit("error");
 	}
-}
+});
 

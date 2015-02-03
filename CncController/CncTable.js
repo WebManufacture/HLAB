@@ -40,8 +40,10 @@ CNC.Init = function (settings) {
 			var arg = message[1];
 			var message = message[0];
 			var path = message.source;
-			path = path.split("/");
-			var type = path[path.length - 1];
+			if (path){
+				path = path.split("/");
+			}
+			var type = "uart.device";// path[path.length - 1];
 			if (arg) {
 				CNC.StateReturned(type, arg);
 			}
