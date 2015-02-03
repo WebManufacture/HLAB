@@ -322,6 +322,9 @@ GParam.prototype = {
 }
 
 CncCompilerCommands = {
+	S: function (params) {
+        return { command: CNC.GCommands.S };
+    },
     C: function (params) {
         return this.GetCircleProg(params);
     },

@@ -1,61 +1,46 @@
-<div id='DevicesWidgetModule' class='widget-module' for='.device-widget'>
-	<style>
-		.device-widget{
-			width: 200px;
-			height: 55px;
-		}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Devices MAP</title>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5?join=true"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="http://klab.web-manufacture.net/HLAB/XRouting/XRouterClient.js"></script>
+	</head>
+	<body class="">
+		<include url='http://services.web-manufacture.net/UI/Toolbars.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/UiUtils.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/Win.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/HtmlElements.htm'></include>
 		
-		.device-widget[state="offline"]{
-			background-color: #E0E0E0;
-		}
+		<div id='DeviceLog' class=''>
+
+		</div>
 		
-		.device-widget[state="closed"]{
-			background-color: #FFE0CF;
-		}
-		
-		.device-widget[state="connected"]{
-			background-color: #CFC;
-		}
-		
-		.device-widget .port-name{
-			font-weight: bold;
-			color: navy;
-		}
-	</style>
-	<script>
-		DevicesWidgetExtention = {  
-			init : function(){
-				var self = this;
-				console.log("init")
-				this.set("@state", 'unconfigured');
-				Channels.on("device.config", function(config){
-					self.configure(config);
+		<script type='text/javascript'>
+			function Init(){
+				var router = new XRouter("localhost"); //Тут нужно передавать адрес сервера, только адрес, без http:// и портов
+				router.getConfig(function(config){ // Если сюда не передать Callback, то генерируется событие "config", как это видно ниже
+					console.log(config);
 				});
-				Channels.on("device.state", function(state){
-					self.setState(state);
+				router.on("connect", function(){DeviceLog.add("LocalServer connected!<br/>")});
+				router.on("close", function(){DeviceLog.add("LocalServer disconnected!<br/>")});
+				router.on("config", function(config){
+					//Сюда вернется объект определенного вида (смотреть в консоле или отладчиком)
+					DeviceLog.add("Available ports: " + config.Serials.join(",") + "<br/>");
 				});
-			},
-			
-			configure: function(config){
-				this.PortName.textContent = config.port;
-				this.PortSpeed.textContent = config.speed;
-			},
-			
-			setState: function(state){
-				if (state){
-					this.set("@state", state);
-				}
-				else{
-					this.set("@state", 'unconfigured');
-				}
-			}
-		};
-	</script>
-	<div class='port-info'>
-		Порт: 
-		<div>
-		<span id="PortName" class='port-name' mapById='^.device-widget'></span>		
-		<span id="PortSpeed" class='port-speed' mapById='^.device-widget'></span>
-			</div>
-	</div>
-</div>
+				router.getConfig();
+				
+				XTunnel = router;
+				
+				//1 роутер всегда может быть подключен только к 1му порту!
+				XTunnel.connect("COM2"); //Тут обязательно нужно передавать имя порта!
+			}			
+		
+			DOM.onLoad(Init);
+		
+		</script>
+	</body>
+</html>
+

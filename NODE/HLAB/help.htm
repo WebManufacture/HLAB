@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<link rel="stylesheet" href="http://services.web-manufacture.net/Styles/System.default.css"/>
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5?join=true"></script>
+
+		<title>HLAB Help Page</title>
+
+		<style type= "text/css">
+			.tree-list{
+				margin-left: 20px;
+			}
+
+			.tree-node>.tree-node-content{
+				padding: 40px;
+			}
+
+			.tree-node-title
+			{
+				font-size: 20px;
+				font-family : 	monospace;
+			}
+
+			.tree-node.opened>.tree-node-title{
+				text-decoration: none;
+				font-weight: bold;
+			}
+
+			.tree-node.opened>.tree-node-content{
+				border: dashed 1px;
+			}
+
+			body{
+				font-family: monospace;
+			}
+
+			.header3 {
+				color: blue;
+				display: block;
+				font-family: monospace;
+				font-size: 20px;
+				font-weight: bold;
+				margin-bottom: 5px;
+				margin-top: 7px;
+			}
+
+			a[name]{
+				cursor: pointer;
+
+			}
+
+			pre.javascript{
+				color: gray;
+			}
+
+		</style>
+		<script type='text/javascript'>
+			WS.DOMload(function(){
+				setTimeout(function(){
+					if (location.hash){
+						var href = location.hash.replace("#", "");
+						var elem = DOM("a[name='" + href + "']");
+						elem = elem.all("^.tree-node");
+						if (elem) elem.each(function(item){item.expand();});
+					}				
+					console.log(location.hash);
+				}, 1000);
+			});
+
+			C.Add({
+				Selector : "a[href^='#']",
+				Condition : "ui-processing",
+				Process : function(item){
+					function searchParent(){
+
+					}
+
+					item.onclick = function(){
+						var href = this.get("@href");
+						href = href.replace("#", "");
+						var elem = DOM("a[name='" + href + "']");
+						elem = elem.get("^.tree-node");
+						if (elem) elem.expand();
+					}
+				}
+			});
+
+			C.Add({
+				Selector : "a[name]",
+				Condition : "ui-processing",
+				Process : function(item){
+					item.onclick = function(){
+						location.hash = "#" + item.get("@name");
+					}
+				}
+			});
+
+			C.Add({
+				Selector : "pre.javascript:not(.processed)",
+				Condition : "ui-processing",
+				Process : function(pre){
+					var txt = pre.get();
+					txt = txt.replace(/(\'[^']*\')/ig, "<span style='color: darkorange'>$1</span>");
+					txt = txt.replace(/(\"[^"]*\")/ig, "<span style='color: darkorange'>$1</span>");
+					txt = txt.replace(/(\/\/.*$)/ig, "<span style='color: #008000; font-weight: bold'>$1</span> ");
+					txt = txt.replace(/(\s)(var|new|for|function|while|do)(\s)/ig, "$1<span style='color: navy; font-weight: bold'>$2</span>$3");
+					txt = txt.replace(/\.(get|all|set|del|all|add|ins|is|has|hide|show|attr)(\W)/ig, "<span style='color: green; font-weight: bold'>.$1</span>$2");
+					txt = txt.replace(/([()])/ig, "<span style='color: black'>$1</span>");
+					txt = txt.replace(/([{}])/ig, "<span style='color: darkgreen'>$1</span>");
+					txt = txt.replace(/([\[\]])/ig, "<span style='color: blue'>$1</span>");
+					pre.set(txt);
+					pre.add(".processed");
+				}
+			})
+
+		</script>
+	</head>
+	<body>
+		<include url="http://modules.web-manufacture.net/Storage.js"></include>
+		<div class='tree-list'>
+			<h1>
+				HLAB
+			</h1>
+			<div class='plain-text'>
+				Это средства, которые позволяют значительно увеличить скорость разработки ПО для Embedded решений.
+				Например такие:
+				<ul>
+					<li>
+						<a href = "http://hlab.web-manufacture.net/">Он-лайн компилятор Си для STM8</a>
+					</li>
+				</ul>
+			</div>
+			<br/>
+			<div class='tree-node' title='XRouting'>
+				
+				<h3 class='header3'>
+					<a class='anchor' name='XRouting'>XRouting</a> - это оверлейная сеть, позволяющая реализовать ф-ии RoboPlatform 
+					на многих существующих интерфейсах
+				</h3>
+				<pre class='plain-text'>	
+					Описание протокола:
+					
+					Формат пакета UART:
+					
+					(каждое число - 8 бит, 1 байт)
+					[01, размер данных, ... данные ..., CRC данных*, 03]
+					
+					*CRC может или быть или не быть.
+					
+					Пакет XRouting: (Вкладывается в поле Данные)
+					(каждое число - 8 бит, 1 байт)
+					
+					[адрес назначения, селектор комманды, адрес источника, признаки пакета, ... данные ...]
+					
+					Селектор комманды - это чаще всего комманда устройству.
+					
+					Признаки - байт, который может быть использован по-разному в зависимости от контекста.
+					Чаще всего содержит комманду на которую следует ответ.
+					
+					Протокол:
+					
+					Адрес назначения 00 посылает широковещательный пакет, который может быть обработан всеми участниками сети.
+					
+					Здесь обозначено:
+					*3й байт - заводского номера означает тип устройства
+					
+					Когда устройство включается оно не имеет своего адреса.
+					При включении оно посылает в сеть пакет:
+					[00, 01, 00, 3й байт, ... свой уникальный заводской номер (8 байт информацции из FLASH) ...]
+					
+					Роутер при включении всегда имеет свой адрес (например 254) и посылает в сеть такой пакет:
+					[00, 03, 254, 3й байт(01 для роутера), ... заводской номер ...]
+					
+					Все устройства при получении такого пакета, обязаны ответить роутеру пакетом:					
+					[254, 04, (свой адрес или 0), 03, ... заводской номер ...]
+					
+					Если роутер видит в этом пакете устройства с адресом 00, то он назначает устройству новый адрес таким пакетом:
+					[00, 02, 254, (Новый адрес), ... заводской номер устройства, которому назначается адрес ...]
+					
+					Также существует пакет "знакомства", но он обязательно должен иметь обратный адрес.
+					[00, 05, (Адрес знакомящегося), 3й байт, ... заводской номер ...]
+					
+					На него остальные отвечают пакетом 04:
+					[(Адрес знакомящегося), 04, (свой адрес или 0), 05, ... заводской номер ...]
+					
+					
+					
+				</pre>
+			</div>
+
+		</div>
+		<include url="http://services.web-manufacture.net/UI/treenode.htm"/>
+	</body>
+</html>

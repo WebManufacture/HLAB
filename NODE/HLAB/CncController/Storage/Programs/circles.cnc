@@ -1,9 +1,10 @@
 #Circles.cnc
-M S6000
+G 0 0 0 S4000
 L 10 40 10
-Z r+100 S7000
+Z r+300 S3000
+M 0 0 0 S1800
 C 5m Pm 
-Z r-100 
-X r+10m S6000
+Z r-300 
+X r+10m S1800
 LF
 X r-40m

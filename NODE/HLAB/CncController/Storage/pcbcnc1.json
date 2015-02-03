@@ -3,13 +3,13 @@
 	"StateUrl":"http://localhost:6670",
 	"CommandUrl":"http://localhost:6670",
 	"ProgramUrl":"http://localhost:6670",
-	"xSpeed" : 7000,
-	"ySpeed" : 9000,
-	"zSpeed" : 9500, 
-	"speed" : 8000, 
-	"mmCoefX": 250, 
-	"mmCoefY": 500, 
-	"mmCoefZ": 100, 
+	"xSpeed" : 3000,
+	"ySpeed" : 3000,
+	"zSpeed" : 3000, 
+	"speed" : 2500, 
+	"mmCoefX": 300, 
+	"mmCoefY": 300, 
+	"mmCoefZ": 300, 
 	"zGValue" : 100
 }
 		
