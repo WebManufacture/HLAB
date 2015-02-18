@@ -313,27 +313,31 @@
 				var content = Editor.TextEditor.getValue();
 
 				//код local storage
-				/*var keyArray = [];
-            var key1 = Editor.HistoryKey;
-            var str = window.localStorage.getItem(key1);
-            var i = 0;
-            // if (str != null){
-            if (str) {
-                keyArray = str.split(",");
-                i = keyArray.length;
-            }
+					var keyArray = [];
+            		var key1 = Editor.HistoryKey;
+            		var str = window.localStorage.getItem(key1);
+            		var i = 0;
+            		// if (str != null){
+            		if (str) {
+                		keyArray = str.split(",");
+                		i = keyArray.length;
+            		}
 
-            if (i >= 20) { keyArray.shift(); i--; }
+            		if (i >= 20) { keyArray.shift(); i--; }
 
-            var now = new Date();
-            now = now.valueOf();
+            		var now = new Date();
+            		now = now.valueOf();
 
-            keyArray[i] = now;
-            var str = keyArray.join(",");
-            window.localStorage.setItem(key1, str); //должна быть строка
-            var key2 = (now + '_' + Request.Params.UserDomain + "/" + Request.Params.SystemPath + "/" + Editor.fileName);
-            window.localStorage.setItem(key2, content);
-			*/
+            		keyArray[i] = now;
+            		var str = keyArray.join(",");
+				try{ // Fenrir
+            		window.localStorage.setItem(key1, str); //должна быть строка
+            		var key2 = (now + '_' + Request.Params.UserDomain + "/" + Request.Params.SystemPath + "/" + Editor.fileName);
+            		window.localStorage.setItem(key2, content);
+				}
+				catch(err){
+					alert("Сохранение в local storage не удалось! Возможно local storage переполнено. " + err);
+					} // Fenrir /
 				var req = XH();
 				var url = "";
 
@@ -387,7 +391,13 @@
 				if (str) {
 					keyArray = str.split(",");
 				}
-
+				
+				//var qqq = 0;
+				//if(keyArray.length>10){
+				//	qqq = keyArray.length -10;					
+				//}
+				
+				//for (var j = qqq; j < keyArray.length; j++) {
 				for (var j = 0; j < keyArray.length; j++) {
 					var saveDate = new Date(parseInt(keyArray[j]));
 					if (isNaN(saveDate)) continue;
@@ -545,6 +555,7 @@
 			{
 				background-color: #fff;
 			}
+			/*
 			#VersionHistory
 			{
 				z-index: 11111;
@@ -574,6 +585,34 @@
 				height: 100%;
 				width : 78%;
 			}
+			*/
+			#VersionHistory
+			{
+				left: 40%;
+				top: 40%;
+				border: solid 1px red;
+				width: 400px;
+				height: 300px;
+				
+ 
+			}
+			#VersionHistory .keyAr
+			{
+				color: navy;
+				cursor: pointer;
+			}
+			#VersionHistory .keyAr:hover
+			{
+				font-weight: bold;
+			}
+			.CodeMirror
+			{
+				line-height: 1.2em;
+				font-size: 14px;
+				font-family: monospace;
+				height: 100%;
+			}
+			
 			.CodeMirror-scroll
 			{
 			}
@@ -804,7 +843,7 @@
 			<div class="status">
 			</div>
 		</div>
-		<div id='VersionHistory' class='invisible' onclick="this.hide();">
+		<div id='VersionHistory' class='invisible window smallwindow' title='История' onclick='this.hide();' style='overflow:auto'>
 		</div>
 	</body>
 </html>
