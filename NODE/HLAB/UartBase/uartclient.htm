@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>UartPorts control</title>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
+		<link type='text/css' rel='stylesheet' href="Index.css" />
+		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5/?join=true"></script>
+		
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartClient.js"></script>
+		<style type='text/css'>
+			#ValuePicker{
+				text-align : center;
+			}
+			
+			#ValuePicker .value-btn{
+				width: 35px;
+				height: 34px;
+				display: inline-block;
+				border: solid 1px gray;
+				padding: 2px;
+				box-sizing: border-box;
+				padding-top: 5px;
+				-moz-box-sizing: border-box;
+			}
+			
+			#ValuePicker .value-btn:hover{
+				border: solid 2px black;
+				padding: 1px;
+				padding-top: 4px;
+			}
+
+			#ValuePicker #MinValueBtn{
+				background-color: #fcc;
+			}
+
+			#ValuePicker #MaxValueBtn{
+				background-color: lightgreen;
+			}
+
+			#ValuePicker #ValueBar:hover{
+				border: solid 2px black;
+				padding: 2px;				
+				padding-top: 4px;
+			}
+			
+			#ValuePicker #ValueBar:hover .title,
+			#ValuePicker #ValueBar:hover .inner
+			{
+				height: 30px;
+				width: 96px;
+				top: 1;
+				left :1;
+			}
+			
+			#ValuePicker #ValueBar:hover .title{
+				padding-top:4px;
+			}
+			
+			#ValuePicker #ValueBar{
+				width: 100px;
+				height: 34px;				
+				display: inline-block;
+				border: solid 1px gray;				
+				box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				position: relative;
+				padding-top: 5px;
+				padding-bottom: 1px;
+			}
+			
+			#ValuePicker #ValueBar .inner{
+				background-color: rgb(0, 125, 120);
+				height: 32px;
+				left: 0;
+				position: absolute;
+				top: 0;
+				width: 98px;
+				z-index: 1;
+			}
+			
+			#ValuePicker #ValueBar .title{
+				height: 32px;
+				left: 0;
+				position: absolute;
+				top: 0;
+				width: 98px;
+				z-index: 2;
+				-moz-box-sizing: border-box;
+				padding-top: 5px;
+				padding-bottom: 1px;
+			}
+
+			#ValuePicker #FrequencyValue{
+				width: 160px;
+				line-height: 14px;
+				min-width: 150px;
+				height: 20px;
+				padding-top: 2px;
+			}
+
+		</style>
+		<script type='text/javascript'>
+			
+			WS.DOMload(function(){
+				//uart = new Uart("http://localhost:5001");
+				uart = new UartManager();
+				PortName.onclick = function(){
+					if (PortName.is(".error")){
+						PortName.del(".error");
+						PortName.set("Connecting...")
+						uart = new UartManager();
+					}
+				}
+				
+			});
+
+			Channels.on("uart.error", function(data){
+				PortName.add(".error");
+				PortName.set("Not connected!");	
+			});
+			Channels.on("uart.config", function(data){
+				if (data.state == 'Online'){
+					PortName.del(".error");
+					PortName.set(data.port + ":" + data.speed);
+					Device.Init(uart);
+				}
+			});
+			
+			Channels.on("uart.mirrored", function(data){
+				DeviceLog.div(".line.info.output", data);
+			});
+			
+			Channels.on("uart.received", function(data){
+				var pack = parsePacket(data);
+				if (pack){
+					if (pack.isSettings){
+						var log = DeviceLog.div(".line.device-settings", "Device settings   Divider: ");
+						log.div('.division', pack.division);
+						log.div('', " Counter: ");
+						log.div('.timer', pack.timer);
+					}
+				}
+				else{
+					DeviceLog.div(".line.info.input", data);
+				}
+			});
+			
+
+
+		</script>
+	</head>
+	<body class="">
+		<include url='http://services.web-manufacture.net/UI/UiUtils.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/Win.htm'></include>
+		<include url='http://services.web-manufacture.net/UI/HtmlElements.htm'></include>
+
+		<div id='StatusBar' class=''>
+				<div class='port-state'>
+					Порт: 
+					<div class='sbar-elem port-elem'>
+						<span id='PortName'></span>
+					</div>
+				</div>
+				<div id='CoordDisplay'>
+
+				</div>				
+				<div id='TimeCoeffBox'>
+
+				</div>
+			</div>
+	</body>
+</html>
+
