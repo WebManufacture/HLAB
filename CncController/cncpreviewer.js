@@ -45,28 +45,28 @@ WS.DOMload(function(){
 		var lxx = 0;
 		var lyy = 0;
 		var lzz = 0;
-		if (CNC.LastState) {
+		if (cnc.LastState) {
 			var lxx = parseInt(lx);
 			var lyy = parseInt(ly);
 			var lzz = parseInt(lz);
 		}		
 		this.startX = 0;
 		this.startY = 0;
-		if (CNC.currentStats){
-			if (CNC.currentStats.sizeX > CNC.currentStats.sizeY){
-				this.xScale = CNC.currentStats.sizeX / (Preview.width - 20);
+		if (cnc.currentStats){
+			if (cnc.currentStats.sizeX > cnc.currentStats.sizeY){
+				this.xScale = cnc.currentStats.sizeX / (Preview.width - 20);
 				this.yScale = this.xScale;
 			}
 			else{
-				this.yScale = CNC.currentStats.sizeY / (Preview.height - 20);
+				this.yScale = cnc.currentStats.sizeY / (Preview.height - 20);
 				this.xScale = this.yScale;
 			}
-			this.startX = CNC.currentStats.minX;
-			this.startY = CNC.currentStats.minY;
+			this.startX = cnc.currentStats.minX;
+			this.startY = cnc.currentStats.minY;
 		}
 		var cx = lxx / this.xScale;
 		var cy = lyy / this.yScale;
-		var zg = CNC.Settings.zGValue;
+		var zg = cnc.Settings.zGValue;
 		if (!zg) zg = 1;
 		dc.fillRect(0, 0, this.width, this.height);
 		dc.beginPath();
@@ -77,8 +77,8 @@ WS.DOMload(function(){
 		dc.closePath();
 		dc.stroke();		
 		dc.beginPath();
-		for (var i = 0; i < CNC.ProgramCode.length && i < 9000; i++) {
-			var line = CNC.ProgramCode[i];
+		for (var i = 0; i < cnc.ProgramCode.length && i < 9000; i++) {
+			var line = cnc.ProgramCode[i];
 			if (!line) {
 				continue;
 			}

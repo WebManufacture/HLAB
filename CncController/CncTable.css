@@ -165,6 +165,11 @@ div.command
 	float: left;
 }
 
+.program-editor .CodeMirror
+{
+	font-family: monospace;
+	height: 400px;
+}
 
 
 #ProgramArea textarea
@@ -201,7 +206,7 @@ div.command
 
 #ProgramResult
 {
-	width: 350px;
+	width: 400px;
 	float: left;
 	text-align: left;
 }
@@ -282,7 +287,6 @@ body.busy .menuitem
 {
 	border: solid 1px gray;
 	background-color: black;
-	float: right;
 }
 
 #ProgramLog 

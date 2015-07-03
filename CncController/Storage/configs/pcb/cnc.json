@@ -1,5 +1,5 @@
 {   
-	"MessagesUrl" : "http://LOCALHOST:6670",
+	"MessagesUrl" : "ws://LOCALHOST:6500",
 	"StateUrl":"http://LOCALHOST:6670",
 	"CommandUrl":"http://LOCALHOST:6670",
 	"ProgramUrl":"http://LOCALHOST:6670",

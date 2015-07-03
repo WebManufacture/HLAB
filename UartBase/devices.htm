@@ -1,0 +1,162 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartManager.js"></script>
+<script src="http://klab.web-manufacture.net/HLAB/UartBase/hlabproxy.js"></script>
+<style type='text/css'>
+	.available-devices
+	{
+		font-size: 26px;
+		color: #aaa;
+		padding: 4px 10px;
+		padding-bottom: 15px;
+		border-bottom: solid 1px gray;
+	}
+
+	.available-devices span, .available-devices div
+	{
+		display: inline-block;
+		padding: 0px 10px;				
+		margin-left: 20px;
+		cursor: pointer;
+	}
+
+	.available-devices .port:hover{
+		background: yellow;
+	}
+
+	.available-devices .port.configured{
+		color: blue;	
+	}
+
+	.available-devices .port.opened
+	{
+		color: green;
+	}
+</style>
+<script type='text/javascript'>
+	UartDevicesWidget = M.GetModuleContainsUrl("UartBase/Devices.htm");
+	
+	UartDevicesWidget.UiContext = {};
+	UartDevicesWidget.UiContext.Selector = ".uart-devices";
+	UartDevicesWidget.UiContext.Condition = "ui-processing";
+	UartDevicesWidget.UiContext.Process = function(element) {
+		UartDevicesWidget.InitElement(element);
+	};
+
+	UartDevicesWidget.Init = function() {
+		if (Request.Params.uart){
+			UartDevicesWidget.Url = "http://" + Request.Params.uart;
+		}
+	};
+	
+	UartDevicesWidget.InitElement = function(elem) {
+		L.Log("Uart connecting...");
+		elem.clear();
+		var url = "http://localhost";
+		if (UartDevicesWidget.Url) url = UartDevicesWidget.Url;
+		var uart = elem.UartManager = new UartManager(url);
+		var AvailablePorts = elem.div(".available-ports");
+		elem.portClients = {};
+		elem.OpenPort = UartDevicesWidget.OpenPort;
+		elem.ClosePort = UartDevicesWidget.ClosePort;
+		elem.ShowDevice = UartDevicesWidget.ShowDevice;
+		uart.on("browse", function(data){
+			AvailablePorts.all(".port").del();
+			for (var port in data){
+				var dv = AvailablePorts.div(".port", port);
+				if (data[port]) dv.add(".configured");
+				dv.set("@port", port);
+				dv.portName = port;
+				dv.onclick = function(){
+					if (elem.portClients[this.portName]){
+						this.del(".opened");
+						elem.ClosePort(this.portName);
+					}
+					else{
+						elem.OpenPort(this.portName);
+					}
+				}
+			}
+		});
+		uart.on("open", function(info){
+			L.Log(info + " opening");
+		});
+		uart.on("error", function(info){
+			L.Error(info);
+		});
+		uart.on("close", function(info){
+			L.Log(info.PortName + " closed");
+		});
+	};
+
+	UartDevicesWidget.OpenPort = function(port){
+		var self = this;
+		this.portClients[port] = this.UartManager.open(port, function(obj){
+			if (obj){
+				var pDiv = self .get(".port[port='" + port + "']");
+				pDiv.add(".opened");
+				Log(port + " opened!");
+				console.log(obj);
+				self.ShowDevice(obj);
+				this.on("error", function(err){
+					L.Error(port + ": " + err);
+				});
+				this.on("closed", function(){
+					self.ClosePort(port);
+				});
+			}
+		}, function(err){
+			if (err){
+				self.portClients[port].close();
+				self.portClients[port] = null;
+				L.Error(port + ": " + err);
+				return;
+			}
+		});
+	}	
+
+	UartDevicesWidget.ClosePort = function(port){
+		var pDiv = this.get(".port[port='" + port + "']");
+		if (pDiv){
+			pDiv.del(".opened");
+		}
+		if (this.portClients[port]){
+			this.portClients[port].close();
+			this.portClients[port] = null;
+		}
+		var d = this.get('.device.' + port);
+		if (d) d.del();
+	}
+
+	UartDevicesWidget.ShowDevice = function(cfg){
+		function CreateLink(title, callback){
+			var a = DOM.tag("a", title);
+			a.set("@href", "javascript:void(0)")
+			a.onclick = callback;
+			return a;
+		}
+
+		function getProtocolName(id){
+			for (var item in protocols){
+				if (protocols[item] == id){
+					return item;
+				}
+			}
+			return null;
+		}
+		
+		var dev = this.div(".device." + cfg.PortName);
+		var dName = cfg.PortName;
+		if (cfg.DeviceName){
+			dName = cfg.DeviceName + "(" + dName + ")";
+		}
+		dev.div(".dev-name", dName);
+		dev.div(".speed", cfg.Speed);
+		var protocol = "raw";
+		if (cfg.RxPacketType){
+			var p = getProtocolName(cfg.RxPacketType);
+			if (p) protocol = p;
+		}
+		dev.div(".protocol", protocol);	
+	}
+</script>
+

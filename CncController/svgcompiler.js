@@ -150,7 +150,7 @@ SvgCodeProcessor.prototype = {
 		this.subY = this.y;
 		if (coords.length > 1){
 			coords.shift();
-			LineCommand(code, coords);
+			this.LineCommand(code, coords);
 		}
 	},
 	
