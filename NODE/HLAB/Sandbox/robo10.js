@@ -1,4 +1,4 @@
-function RoboController8(robo){
+function RoboController10(robo){
 	this.robo = robo;
 	
 	this.onInterval = function(){
@@ -18,8 +18,8 @@ function RoboController8(robo){
 	}
 }
 
-RoboController8.prototype = {
+RoboController10.prototype = {
 	
 }
 
-new RoboController8(this);
+new RoboController10(this);

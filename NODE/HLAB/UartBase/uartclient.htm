@@ -4,172 +4,327 @@
 		<title>UartPorts control</title>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 		<link type='text/css' rel='stylesheet' href="http://services.web-manufacture.net/Styles/System.default.css" />
-		<link type='text/css' rel='stylesheet' href="Index.css" />
 		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5/?join=true"></script>
-		
+
 		<script src="/socket.io/socket.io.js"></script>
-		<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartClient.js"></script>
+		<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartManager.js"></script>
+		
+		<script src="http://klab.web-manufacture.net/HLAB/UartBase/hlabproxy.js"></script>
 		<style type='text/css'>
-			#ValuePicker{
-				text-align : center;
-			}
-			
-			#ValuePicker .value-btn{
-				width: 35px;
-				height: 34px;
-				display: inline-block;
-				border: solid 1px gray;
-				padding: 2px;
-				box-sizing: border-box;
-				padding-top: 5px;
-				-moz-box-sizing: border-box;
-			}
-			
-			#ValuePicker .value-btn:hover{
-				border: solid 2px black;
-				padding: 1px;
-				padding-top: 4px;
-			}
 
-			#ValuePicker #MinValueBtn{
-				background-color: #fcc;
-			}
-
-			#ValuePicker #MaxValueBtn{
-				background-color: lightgreen;
-			}
-
-			#ValuePicker #ValueBar:hover{
-				border: solid 2px black;
-				padding: 2px;				
-				padding-top: 4px;
-			}
-			
-			#ValuePicker #ValueBar:hover .title,
-			#ValuePicker #ValueBar:hover .inner
+			#AvailablePorts
 			{
-				height: 30px;
-				width: 96px;
-				top: 1;
-				left :1;
+				font-size: 26px;
+				color: #aaa;
+				padding: 4px 10px;
+				padding-bottom: 15px;
+				border-bottom: solid 1px gray;
 			}
 			
-			#ValuePicker #ValueBar:hover .title{
-				padding-top:4px;
-			}
-			
-			#ValuePicker #ValueBar{
-				width: 100px;
-				height: 34px;				
+			#AvailablePorts span, #AvailablePorts div
+			{
 				display: inline-block;
-				border: solid 1px gray;				
-				box-sizing: border-box;
-				-moz-box-sizing: border-box;
-				position: relative;
-				padding-top: 5px;
-				padding-bottom: 1px;
+				padding: 0px 10px;				
+				margin-left: 20px;
+				cursor: pointer;
 			}
 			
-			#ValuePicker #ValueBar .inner{
-				background-color: rgb(0, 125, 120);
-				height: 32px;
-				left: 0;
-				position: absolute;
-				top: 0;
-				width: 98px;
-				z-index: 1;
+			#AvailablePorts .port:hover{
+				background: yellow;
 			}
 			
-			#ValuePicker #ValueBar .title{
-				height: 32px;
-				left: 0;
-				position: absolute;
-				top: 0;
-				width: 98px;
-				z-index: 2;
-				-moz-box-sizing: border-box;
-				padding-top: 5px;
-				padding-bottom: 1px;
+			#AvailablePorts .port.configured{
+				color: blue;	
 			}
 
-			#ValuePicker #FrequencyValue{
-				width: 160px;
-				line-height: 14px;
-				min-width: 150px;
-				height: 20px;
-				padding-top: 2px;
+			#AvailablePorts .port.opened
+			{
+				color: green;
+			}
+			
+			#MainContent{
+				height: 92%;
 			}
 
+			#Logs{
+				width : 30%;
+				height: 100%;
+				overflow-y: scroll;
+				white-space: normal;
+				float: left;
+			}
+			
+			#Logs>div{
+				margin-bottom: 5px;
+			}
+			
+			#Logs div div{
+				display: inline;
+			}
+			
+			#Logs .info{
+				color: gray;
+			}
+			
+			#Logs .error{
+				color: red;
+			}
+			
+			#DeviceBox{
+				width : 30%;
+				height: 100%;
+				white-space: normal;
+				float: left;
+			}
+			
+			#DeviceBox .dev-name{
+				font-size: 30px;
+				color: green;
+			}
+			
+			#Receiving{
+				width : 35%;
+				height: 100%;
+				overflow-y: scroll;
+				white-space: normal;
+				float: left;
+			}
 		</style>
-		<script type='text/javascript'>
-			
-			WS.DOMload(function(){
-				//uart = new Uart("http://localhost:5001");
-				uart = new UartManager();
-				PortName.onclick = function(){
-					if (PortName.is(".error")){
-						PortName.del(".error");
-						PortName.set("Connecting...")
-						uart = new UartManager();
-					}
-				}
-				
-			});
-
-			Channels.on("uart.error", function(data){
-				PortName.add(".error");
-				PortName.set("Not connected!");	
-			});
-			Channels.on("uart.config", function(data){
-				if (data.state == 'Online'){
-					PortName.del(".error");
-					PortName.set(data.port + ":" + data.speed);
-					Device.Init(uart);
-				}
-			});
-			
-			Channels.on("uart.mirrored", function(data){
-				DeviceLog.div(".line.info.output", data);
-			});
-			
-			Channels.on("uart.received", function(data){
-				var pack = parsePacket(data);
-				if (pack){
-					if (pack.isSettings){
-						var log = DeviceLog.div(".line.device-settings", "Device settings   Divider: ");
-						log.div('.division', pack.division);
-						log.div('', " Counter: ");
-						log.div('.timer', pack.timer);
-					}
-				}
-				else{
-					DeviceLog.div(".line.info.input", data);
-				}
-			});
-			
-
-
-		</script>
 	</head>
 	<body class="">
 		<include url='http://services.web-manufacture.net/UI/UiUtils.htm'></include>
 		<include url='http://services.web-manufacture.net/UI/Win.htm'></include>
 		<include url='http://services.web-manufacture.net/UI/HtmlElements.htm'></include>
 
-		<div id='StatusBar' class=''>
-				<div class='port-state'>
-					Порт: 
-					<div class='sbar-elem port-elem'>
-						<span id='PortName'></span>
-					</div>
-				</div>
-				<div id='CoordDisplay'>
-
-				</div>				
-				<div id='TimeCoeffBox'>
-
-				</div>
+		<div id='AvailablePorts' class=''>
+			<span class='title'>Порты: </span>			
+		</div>
+		
+		<div id='MainContent'>
+			<div id='Logs'>
+				
 			</div>
+			<div id='DeviceBox'>
+				
+			</div>
+			<div id='Receiving'>
+				
+			</div>
+			<div id='Sending'>
+				
+			</div>
+		</div>
+
+
+		<script type='text/javascript'>
+			
+			protocols =  {
+				Raw : 0,
+				Simple : 1,      //UNSIZED               #02 ... data ... #03
+				SimpleCoded : 2, //UNSIZED               coded by 2bytes ($3D : #F3 #FD) data      #02 ... coded data ... #03
+				SimpleCRC : 3,   //UNSIZED               WITH CRC  #02 ... data ... #crc #03
+				PacketInvariant : 5,// CAN BE 2, 3, 10, 11, 14, 15
+				Sized : 10,      //SIZED  #01 #size #02? ... data ... #03
+				SizedOld : 11,   //SIZED  #01 #size #02? ... data ... #04
+				SizedCRC : 14,   //SIZED  #01 #size #02? ... data ... #CRC #03
+				SizedCRC_old : 15,   //SIZED  #01 #size ... data ... #CRC #04
+				Addressed : 20,  //With addr  #01 #size #addr ... data ... #03
+				AddressedOld : 21,  //With addr  #01 #size #addr ... data ... #04
+				XRouting : 30,    //XRouting addressed  #01 #size #dstAddr #dstType #srcAddr #srcType ... data ... #crc #03
+				LIN : 32    //XRouting addressed  #01 #size #02 #dstAddr #dstType #srcAddr #srcType ... data ... #crc #03
+			}
+			
+			portClients = {};
+
+			WS.DOMload(function(){
+				var url = "http://localhost";
+				if (Request.Params.url){
+					url = "http://" + Request.Params.url;
+				}
+				
+				proxy = new HLabProxy("ws://klab.web-manufacture.net:4008")
+				
+				Log("Connecting...");
+				uart = new UartManager(url);
+				uart.on("browse", function(data){
+					Log("Connected!");
+					AvailablePorts.all(".port").del();
+					for (var port in data){
+						var dv = AvailablePorts.div(".port", port);
+						if (data[port]) dv.add(".configured");
+						dv.set("@port", port);
+						dv.portName = port;
+						dv.onclick = function(){
+							if (portClients[this.portName]){
+								this.del(".opened");
+								ClosePort(this.portName);
+							}
+							else{
+								OpenPort(this.portName);
+							}
+						}
+					}
+				});
+				uart.on("open", function(info){
+					Log(info + " opening");
+				});
+				uart.on("error", function(info){
+					Error(info);
+				});
+				uart.on("close", function(info){
+					Log(info.PortName + " closed");
+				});
+			});
+			
+			function Log(str){
+				var dt = new Date();
+				var ln = Logs.ins(DOM.div(".info"));
+				ln.div(".date", dt.formatTime("HH:mm:ss"));
+				ln.innerHTML += ' ' + str;
+			}
+			
+			function Error(str){
+				var dt = new Date();
+				var ln = Logs.ins(DOM.div(".error"));
+				ln.div(".date", dt.formatTime("HH:mm:ss"));
+				ln.innerHTML += ' ' +  str;
+			}
+			
+			function OpenPort(port){
+				portClients[port] = uart.open(port, function(obj){
+					if (obj){
+						var pDiv = AvailablePorts.get(".port[port='" + port + "']");
+						pDiv.add(".opened");
+						Log(port + " opened!");
+						console.log(obj);
+						ShowDevice(obj);
+						this.on("error", function(err){
+							Error(port + ": " + err);
+						});
+						this.on("closed", function(){
+							ClosePort(port);
+						});
+						this.on("received", function(data){
+							MessageReceived(port, data);
+						});
+					}
+				}, function(err){
+					if (err){
+						portClients[port].close();
+						portClients[port] = null;
+						Error(port + ": " + err);
+						return;
+					}
+				});
+			}
+			
+			function SendDiscovery(port){
+				var client = portClients[port];
+				if (portClients[port]){
+					client.send([0, 5, 0, 0]);
+				}
+			}
+			
+			function MessageReceived(port, msg){
+				var dt = new Date();
+				var ln = Receiving.ins(DOM.div(".msg"));
+				ln.div(".info", dt.formatTime("HH:mm:ss") + " " + port);
+				ln.add('<br/> ' +  msg);
+			}
+			
+			function ShowDevice(cfg){
+				var dev = DeviceBox.div(".device." + cfg.PortName);
+				var dName = cfg.PortName;
+				if (cfg.DeviceName){
+					dName = cfg.DeviceName + "(" + dName + ")";
+				}
+				dev.div(".dev-name", dName);
+				dev.div(".speed", cfg.Speed);
+				var protocol = "raw";
+				if (cfg.RxPacketType){
+					var p = getProtocolName(cfg.RxPacketType);
+					if (p) protocol = p;
+				}
+				dev.div(".protocol", protocol);	
+				dev.add(CreateLink("send discovery packet", function(){
+					SendDiscovery(cfg.PortName);
+				}));
+				
+				
+				dev.add(DOM.tag("br"));		
+				dev.add(CreateLink("Start", function(){
+					var client = portClients[cfg.PortName];
+					if (client){
+						client.send([2, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					}
+				}));
+						
+						
+				dev.add(DOM.tag("br"));		
+				dev.add(CreateLink("Pause", function(){
+					var client = portClients[cfg.PortName];
+					if (client){
+						client.send([2, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					}
+				}));
+				
+				dev.add(DOM.tag("br"));		
+				dev.add(CreateLink("Stop", function(){
+					var client = portClients[cfg.PortName];
+					if (client){
+						client.send([2, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					}
+				}));
+				
+							
+				dev.add(DOM.tag("br"));		
+				dev.add(CreateLink("<<", function(){
+					var client = portClients[cfg.PortName];
+					if (client){
+						client.send([2, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					}
+				}));
+				
+				
+				dev.add(DOM.tag("br"));		
+				dev.add(CreateLink(">>", function(){
+					var client = portClients[cfg.PortName];
+					if (client){
+						client.send([2, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					}
+				}));
+			}
+			
+			function CreateLink(title, callback){
+				var a = DOM.tag("a", title);
+				a.set("@href", "javascript:void(0)")
+				a.onclick = callback;
+				return a;
+			}
+			
+			function getProtocolName(id){
+				for (var item in protocols){
+					if (protocols[item] == id){
+						return item;
+					}
+				}
+				return null;
+			}
+			
+			function ClosePort(port){
+				var pDiv = AvailablePorts.get(".port[port='" + port + "']");
+				if (pDiv){
+					pDiv.del(".opened");
+				}
+				if (portClients[port]){
+					portClients[port].close();
+					portClients[port] = null;
+				}
+				var d = DeviceBox.get('.device.' + port);
+				if (d) d.del();
+			}
+
+		</script>
 	</body>
 </html>
 

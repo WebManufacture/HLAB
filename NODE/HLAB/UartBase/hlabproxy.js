@@ -1,8 +1,6 @@
-UartClient = function(url, channelName){
+HLabProxy = function(url, channelName){
 	if (!url) url = "ws://localhost:5000";
 	this.socketUrl = url;
-	
-	UartClient.Current = this;
 	
 	var self = this;
 	
@@ -32,7 +30,7 @@ UartClient = function(url, channelName){
 	}, 400)
 }
 
-UartClient.prototype = {
+HLabProxy.prototype = {
 	send : function(data){
 		this.socket.send(JSON.stringify(data));
 	},

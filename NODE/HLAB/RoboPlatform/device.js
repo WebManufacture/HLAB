@@ -9,7 +9,7 @@ Device = {
 	pwmCoeff : 10,
 	
 	Init : function(uart){
-		this.uart = uart;	
+		//this.uart = uart;	
 	},
 	
 	Compile : function(progs){
@@ -149,17 +149,28 @@ Device = {
 		this.currentCommand = 0;
 		this.currentProg = prog;
 		if (prog.length > 0){
-			this.currentTimeout = setTimeout(this.nextStep.bind(this), prog[0].sec * PUI.timeCoef * 1000);
+			this.currentTimeout = setTimeout(this.nextStep.bind(this), prog[0].sec * PUI.timeCoef * 100000);
+		}
+	},
+	StartF : function(){
+		if (this.currentTimeout) clearTimeout(this.currentTimeout);
+		
+		var prog = Device.Compile(PUI.GetProgram());
+		this.currentCommand = 0;
+		this.currentProg = prog;
+		if (prog.length > 0){
+			PUI.timeCoef = 0.0001;
+			this.currentTimeout = setTimeout(this.nextStep.bind(this), prog[0].sec * PUI.timeCoef * 100000);
 		}
 	},
 	
 	Reset : function(){
-		this.uart.send(this.toSized({command : 0, port: 1}));
+		uart.send(this.toSized({command : 0, port: 1}));
 	},
 	
 	Stop : function(){
 		if (this.currentTimeout) clearTimeout(this.currentTimeout);
-		this.send({command : 9, port: 1, value : 0});
+		uart.send([2, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);//this.send({command : 9, port: 1, value : 0});
 	},
 	
 	nextStep :function(){
@@ -167,21 +178,20 @@ Device = {
 		if (this.currentCommand < prog.length){
 			var p = prog[this.currentCommand];
 			if (p){
-				if (p.value > 0 && p.value < 100){
-					this.send({command : 2, port: p.port, low : (100 - p.value)/10, high: 1});
+				if (p.value > 50){
+					uart.send([2, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					uart.send([2, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
 				}
-				if (p.value == 100){
-					this.send({command : 1, port: p.port, low : 1, high:0});
-				}
-				if (p.value == 0){
-					this.send({command : 1, port: p.port, low : 0, high:0});
+				else{
+					uart.send([2, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
+					uart.send([2, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]);
 				}
 			}
 			this.currentCommand++;
 			this.lastsec = p.sec * PUI.timeCoef ;
 			p = prog[this.currentCommand];
 			if (p){
-				this.currentTimeout = setTimeout(this.nextStep.bind(this), (p.sec * PUI.timeCoef  - this.lastsec) * 1000);
+				this.currentTimeout = setTimeout(this.nextStep.bind(this), (p.sec * PUI.timeCoef  - this.lastsec) * 100000);
 			}
 		}
 	},
@@ -224,7 +234,7 @@ Device = {
 		this.commands = [];	
 	},
 	
-	send : function(obj, port, value){
+	send : function(obj){
 		if (!this.commands) this.clear();
 		if (typeof (obj) == "object"){
 			this.commands.push(obj);
@@ -237,17 +247,18 @@ Device = {
 				this.commands.push({command : obj, port : port, value : value});
 			}
 		}
+		this.flush(this.commands);
 	},
 	
 	flush : function(commands){
 		if (!commands) commands = this.commands;		
 		if (!commands || commands.length == 0) return;
 		//this.uart.send(this.toSized({command : Device.THRESHOLD_COMMAND, port : 0,  value : 6000}));
-		this.uart.send(this.toSized({command : 40}));
+		uart.send(this.toSized({command : 40}));
 		for (var i = 0; i <  this.commands.length; i++){
-			this.uart.send(this.toSized(this.commands[i]));
+			uart.send(this.toSized(this.commands[i]));
 		}
-		this.uart.send(this.toSized({command : 41}));
+		uart.send(this.toSized({command : 41}));
 	}
 }
 

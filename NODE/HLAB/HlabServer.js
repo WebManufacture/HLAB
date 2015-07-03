@@ -190,17 +190,22 @@ HLabServer.prototype = {
 		var clients = this.ConnectedClients;
 		var me = this;
 
+		/*
 		var netServer = this.NetServer = Net.createServer(function(client) { //'connection' listener
 			try{
-				var clientId = (Math.random() + "").replace("0.", "");
-				netClients[clientId] = client;
+				var clientId;// = (Math.random() + "").replace("0.", "");
+				//netClients[clientId] = client;
 				logger.log('client connected: ' + clientId + " " + client.remoteAddress + ":" + client.remotePort);
 				client.on('error', function(err) {
 					logger.error(err);
 				});
 				client.on('end', function() {
 					try{
-						delete netClients[clientId];
+						if (clientId){
+							delete netClients[clientId];
+							Channels.emit("/HLAB/XROUTING/" + clientId + ".disconnected", clientId);
+						}
+						
 						delete me.AvailableConfigs[clientId];
 						logger.log('client disconnected: ' + clientId);
 					}
@@ -210,7 +215,8 @@ HLabServer.prototype = {
 				});		
 				client.setEncoding('utf8');
 				client.once('data', function(cfg){
-					me.NetClientConnected(cfg, clientId)
+					clientId = me.NetClientConnected(cfg, client);
+					me.ConnectedPorts[clientId] = client;
 				});
 			}
 			catch(err){
@@ -221,16 +227,14 @@ HLabServer.prototype = {
 		netServer.listen(4000, function() { //'listening' listener
 			logger.log('NET Server bound: ' + 4000);
 		});
-
-		this.SockServer = useSystem('socket.io').listen(4008, { log: false });
-		logger.log(">>>HLAB socket server: " + 4008);
+		this.SockServer = useSystem('socket.io')(9013);
 		this.SockServer.on('error', function(err){
 			logger.log(">>>HLAB socket server error: ");
 			logger.error(err);
 		});
 		this.SockServer.on('connection', function (socket) {
 			try{
-				var path = '/';
+				/*var path = '/';
 				if (socket.namespace){
 					path += socket.namespace.name;
 				}
@@ -238,7 +242,8 @@ HLabServer.prototype = {
 				if (!nc){
 					socket.end("No net clients with id: " + socket.namespace.name);
 				}
-				var clientId = (Math.random() + "").replace("0.", "");
+			    var clientId = (Math.random() + "").replace("0.", "");
+				logger.log(">>>HLAB socket connected: " + clientId);
 				me.ConnectedClients[clientId] = socket;
 				socket.on('error', function (err) {
 					logger.log(">>>HLAB socket server error: " + path);
@@ -247,13 +252,15 @@ HLabServer.prototype = {
 				var handler = function(data, arg){
 					socket.emit('message', [data, arg]);
 				}			
-				Channels.on("/HLAB/COM_ROUTER" + path + ".from-uart-client", handler);		
+				Channels.on("/HLAB/XROUTER/*.in", handler);	
+				Channels.on("/HLAB/XROUTER/IN", handler);		
 				socket.on('disconnect', function (socket) {
 					delete me.ConnectedClients[clientId];
 				});	
 				socket.on("message", function(message, data){
 					logger.log(message);
-					Channels.emit("/HLAB/COM_ROUTER" + path + ".to-uart-client", message);
+					var dst = message.dst;
+					Channels.emit("/HLAB/XROUTER/" + dst + ".out", message.data);
 				});
 			}
 			catch(err){
@@ -261,12 +268,13 @@ HLabServer.prototype = {
 				logger.error(err);
 			}
 		});			
+		logger.log(">>>HLAB socket server: " + 9013);*/
 	},
 
 	Stop : function(){			
 		this.logger.log("HLAB server stopping");
-		try{
-			var netClients = this.ConnectedPorts;
+		/*try{
+			r netClients = this.ConnectedPorts;
 			var clients = this.ConnectedClients;
 			for (var cid in clients){
 				if (clients[cid]){
@@ -278,33 +286,40 @@ HLabServer.prototype = {
 					netClients[cid].end("Server stopping!");
 				}
 			}
-			if (this.SockServer){
-				this.SockServer.close();
-				this.SockServer = null;
-			}	
 			if (this.NetServer){
 				this.NetServer.close();
 				this.NetServer = null;
-			}			
+			}		
+			if (this.SockServer){
+				this.SockServer.close();
+				this.SockServer = null;
+			}		
 		}
 		catch(err){
 			this.logger.error("Error stopping HLAB server:");
 			this.logger.error(err);
-		}
+		}*/
 	},
 
 
-	NetClientConnected : function(cfg, cid){
+	NetClientConnected : function(cfg, client){
 		try{
 			var me = this;
-			cfg = JSON.parse(cfg);			
-			var client = this.ConnectedPorts[cid];
-			if (!client) {
-				this.logger.log("Unknown client: " + cid);
-				return;
-			}
-			this.logger.log("HLAB PORTS Avalable on " + client.remoteAddress);
-			this.logger.log(cfg);
+			if ((cfg + "").length != 9){
+				console.error("unknown config " + cfg);
+				//return;
+			}			
+			var cid = cfg;			
+			//var client = ;
+			client.on('data', function(data){
+				me.NetClientData(data, cid);
+			});
+			Channels.emit("/HLAB/XROUTER/" + cid + ".connected", cfg);
+			Channels.on("/HLAB/XROUTER/" + cid + ".out", function(msg, data){
+				client.send(data);
+			});
+			return cfg;
+			/*this.logger.log(cfg);
 			var res = { };
 			var sr = cfg.Serials;
 			for (var i = 0; i < sr.length; i++){
@@ -316,9 +331,7 @@ HLabServer.prototype = {
 				this.logger.log(line.PortName + " " + line.Speed + " " + line.RxPacketType);
 			}			 
 			this.AvailableConfigs[cid] = {ServerId : cfg.ServerId, Ports : res, Addr : client.remoteAddress + ":" + client.remotePort};
-			client.on('data', function(data){
-				me.NetClientData(data, cid);
-			});
+			*/
 		}
 		catch(err){
 			this.logger.log("Unknown client: " + cid);
@@ -328,12 +341,13 @@ HLabServer.prototype = {
 
 	NetClientData : function(data, cid){
 		try{			
-			this.logger.log(data);
-			data = JSON.parse(data);
-			Channels.emit("/HLAB/COM_ROUTER/" + cid + ".to-uart-client", data);
+			console.log(data);
+			//data = JSON.parse(data);
+			Channels.emit("/HLAB/XROUTER/" + cid + ".in", data);
+			Channels.emit("/HLAB/XROUTER/IN", data);
 		}
 		catch(err){
-			this.logger.error(err);
+			console.error(err);
 		}
 	}
 }

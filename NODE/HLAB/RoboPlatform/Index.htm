@@ -8,7 +8,9 @@
 		<script type="text/javascript" src="http://services.web-manufacture.net/Base/v1.5/?join=true"></script>
 		
 		<script src="/socket.io/socket.io.js"></script>
-		<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartClient.js"></script>
+		<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartManager.js"></script>
+		
+		<script src="http://klab.web-manufacture.net/HLAB/UartBase/hlabproxy.js"></script>
 		<script type='text/javascript' src='value-editor.js'>		</script>
 		<script type='text/javascript' src='LineEditor.js'>		</script>
 		<script type='text/javascript' src='Settings.js'>		</script>
@@ -114,7 +116,7 @@
 
 			WS.DOMload(function(){
 				//uart = new Uart("http://localhost:5001");
-				uart = new UartManager();
+				uart = new HLabProxy("ws://localhost:5000/COM4");
 				PortName.onclick = function(){
 					if (PortName.is(".error")){
 						PortName.del(".error");
@@ -284,7 +286,7 @@
 			<div class='separator'>
 			</div>
 
-			<div class='menuitem start' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="Device.Start()">
+			<div class='menuitem start' icon='http://cdn1.iconfinder.com/data/icons/nuove/32x32/actions/player_play.png' onclick="Device.StartF()">
 				Start
 				<influence class='add' target='.menuitem.start'>.disabled</influence>
 				<influence class='del' target='.menuitem.stop'>.disabled</influence>

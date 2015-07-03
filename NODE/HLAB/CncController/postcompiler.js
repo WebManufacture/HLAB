@@ -22,18 +22,18 @@ PostCompiler.ProcessCode = function(code){
 	var lxx = 0;
 	var lyy = 0;
 	var lzz = 0;
-	if (CNC.LastState) {
+	if (cnc.LastState) {
 		var lxx = parseInt(lx);
 		var lyy = parseInt(ly);
 		var lzz = parseInt(lz);
 	}
-	var lss = CNC.Settings.speed;
-	var maxX = CNC.Settings.maxX;
-	var maxY = CNC.Settings.maxY;
-	var maxZ = CNC.Settings.maxZ;
-	var minX = CNC.Settings.minX;
-	var minY = CNC.Settings.minY;
-	var minZ = CNC.Settings.minZ;
+	var lss = cnc.Settings.speed;
+	var maxX = cnc.Settings.maxX;
+	var maxY = cnc.Settings.maxY;
+	var maxZ = cnc.Settings.maxZ;
+	var minX = cnc.Settings.minX;
+	var minY = cnc.Settings.minY;
+	var minZ = cnc.Settings.minZ;
 	var ptx = 0;
 	var pty = 0;
 	var ptz = 0;
@@ -101,28 +101,28 @@ PostCompiler.ProcessCode = function(code){
 	stats.sizeX = (maxX - minX);
 	stats.sizeY = (maxY - minY);
 	stats.sizeZ = (maxZ - minZ);
-	stats.lengthX = (maxX - minX)/CNC.Settings.mmCoefX;
-	stats.lengthY = (maxY - minY)/CNC.Settings.mmCoefY;
-	stats.lengthZ = (maxZ - minZ)/CNC.Settings.mmCoefZ;
+	stats.lengthX = (maxX - minX)/cnc.Settings.mmCoefX;
+	stats.lengthY = (maxY - minY)/cnc.Settings.mmCoefY;
+	stats.lengthZ = (maxZ - minZ)/cnc.Settings.mmCoefZ;
 	stats.stepsX = ptx;
 	stats.stepsY = pty;
 	stats.stepsZ = ptz;
-	CNC.currentStats = stats;
+	cnc.currentStats = stats;
 	return code;
 };
 
 
 PostCompiler.ShowCode = function(code){
-	CNC.ProgramCode = code;
+	cnc.ProgramCode = code;
 	var lxx = 0;
 	var lyy = 0;
 	var lzz = 0;
-	if (CNC.LastState) {
+	if (cnc.LastState) {
 		var lxx = parseInt(lx);
 		var lyy = parseInt(ly);
 		var lzz = parseInt(lz);
 	}
-	var lss = CNC.Settings.speed;
+	var lss = cnc.Settings.speed;
 	var zx = 120;
 	var zy = 120;//
 	var pr = DOM("#ProgramResultCode");
@@ -142,24 +142,24 @@ PostCompiler.ShowCode = function(code){
 	var ptz = 0;
 	var ptzScale = 1;
 	var validateBorders = false;
-	if (Number.isFinite(CNC.Settings.minX) && 
-		Number.isFinite(CNC.Settings.minY) &&
-		Number.isFinite(CNC.Settings.minZ) && 
-		Number.isFinite(CNC.Settings.maxX) &&
-		Number.isFinite(CNC.Settings.maxY) &&
-		Number.isFinite(CNC.Settings.maxZ)
+	if (Number.isFinite(cnc.Settings.minX) && 
+		Number.isFinite(cnc.Settings.minY) &&
+		Number.isFinite(cnc.Settings.minZ) && 
+		Number.isFinite(cnc.Settings.maxX) &&
+		Number.isFinite(cnc.Settings.maxY) &&
+		Number.isFinite(cnc.Settings.maxZ)
 	   )
 	{
 		validateBorders = true;
 	}
 	try {		
-		for (var i = 0; i < CNC.ProgramCode.length; i++) {
-			var line = CNC.ProgramCode[i];
+		for (var i = 0; i < cnc.ProgramCode.length; i++) {
+			var line = cnc.ProgramCode[i];
 			if (!line) {
 				continue;
 			}
 			if (line.command == 0){
-				CNC.ProgramCode.splice(i, 1);
+				cnc.ProgramCode.splice(i, 1);
 				i--;
 				continue;
 			}
@@ -171,24 +171,24 @@ PostCompiler.ShowCode = function(code){
 				ac.z += lzz;
 			}
 			if (validateBorders){
-				if ((ac.x < CNC.Settings.minX || ac.y < CNC.Settings.minY || ac.z < CNC.Settings.minZ)) {
+				if ((ac.x < cnc.Settings.minX || ac.y < cnc.Settings.minY || ac.z < cnc.Settings.minZ)) {
 					pl.add(".error");
 					pr.add(".error");
-					CNC.ProgramCode = null;
+					cnc.ProgramCode = null;
 					break;
 				}
-				if ((ac.x > CNC.Settings.maxX || ac.y > CNC.Settings.maxY || ac.z > CNC.Settings.maxZ)) {
+				if ((ac.x > cnc.Settings.maxX || ac.y > cnc.Settings.maxY || ac.z > cnc.Settings.maxZ)) {
 					pl.add(".error");
 					pr.add(".error");
-					CNC.ProgramCode = null;
+					cnc.ProgramCode = null;
 					break;
 				}
 			}
 			var pl = pr.div(".prog-line");
 			pl.onclick = function(){
-				CNC.ProgramCode.splice(this.lineNum, 1);
-				PostCompiler.ShowCode(CNC.ProgramCode);
-				Preview.ShowCode(CNC.ProgramCode);
+				cnc.ProgramCode.splice(this.lineNum, 1);
+				PostCompiler.ShowCode(cnc.ProgramCode);
+				Preview.ShowCode(cnc.ProgramCode);
 			}
 			var lnElem = pl.div(".line-num", i + 1);
 			lnElem.add("@num", i + 1);
@@ -250,12 +250,12 @@ PostCompiler.ShowCode = function(code){
 	size.div(".size-x.elem", "X: " + (maxX - minX));
 	size.div(".size-y.elem", "Y: " + (maxY - minY));
 	size.div(".size-z.elem", "Z: " + (maxZ - minZ));
-	stats.lengthX = (maxX - minX)/CNC.Settings.mmCoefX;
-	stats.lengthY = (maxY - minY)/CNC.Settings.mmCoefY;
-	stats.lengthZ = (maxZ - minZ)/CNC.Settings.mmCoefZ;
-	dl.div(".length-x", "Ширина(X,мм): " + ((maxX - minX)/CNC.Settings.mmCoefX));
-	dl.div(".length-y", "Высота(Y,мм): " + ((maxY - minY)/CNC.Settings.mmCoefY));
-	dl.div(".length-z", "Глубина(Z,мм): " + ((maxZ - minZ)/CNC.Settings.mmCoefZ));
+	stats.lengthX = (maxX - minX)/cnc.Settings.mmCoefX;
+	stats.lengthY = (maxY - minY)/cnc.Settings.mmCoefY;
+	stats.lengthZ = (maxZ - minZ)/cnc.Settings.mmCoefZ;
+	dl.div(".length-x", "Ширина(X,мм): " + ((maxX - minX)/cnc.Settings.mmCoefX));
+	dl.div(".length-y", "Высота(Y,мм): " + ((maxY - minY)/cnc.Settings.mmCoefY));
+	dl.div(".length-z", "Глубина(Z,мм): " + ((maxZ - minZ)/cnc.Settings.mmCoefZ));
 	var stps = dl.div(".steps","Шагов: ");
 	stps.div(".steps-x.elem", "X: " + ptx);
 	stps.div(".steps-y.elem", "Y: " + pty);
@@ -266,6 +266,6 @@ PostCompiler.ShowCode = function(code){
 	dl.div(".steps-all","Всего: " + (ptx + pty + ptz) + "<br/>");
 	pt = Math.round((ptx + pty + ptz) * ptzScale * (0.815390715061537538898254826049));
 	dl.div(".times-all", "Итого: " + (new Date(pt)).formatTime(true) + "<br/>");
-	CNC.currentStats = stats;
+	cnc.currentStats = stats;
 	return stats;
 };
