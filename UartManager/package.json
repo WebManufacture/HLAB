@@ -1,0 +1,15 @@
+﻿{
+  "name": "RoboPlatform-USBManager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "window": {
+    "width": 800,
+    "height": 500,
+    "title" : "RoboPlatform",
+	"icon":"favicon-32x32.png"
+  },
+  "dependencies": {
+	"serialport":"latest"
+  }
+}

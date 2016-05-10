@@ -25,7 +25,7 @@
 				z-index: 0;
 			}
 			
-			.robo{
+			.robo, #Robo0{
 				-moz-box-sizing: border-box;
 				background: no-repeat no-scroll 0 0 #FFFFFF;
 				background-color: white;
@@ -64,11 +64,11 @@
 				display: none;
 			}
 			
-			#Robo5{
+			#Robo9{
 				background-color: #FF9090;
 			}
-						
-			#Robo3{
+			
+			#Robo1,#Robo2,#Robo3,#Robo4,#Robo5,#Robo6,#Robo7,#Robo8{
 				background-color: #AFA;
 			}
 			
@@ -81,6 +81,14 @@
 			WS.DOMload(function(){
 				WindowResized();
 			});
+			
+			function OnPageLoaded(){
+				if (Request.Params.num){
+					DOM.all(".robo").each(function(elem){
+						if (elem.get("@num") != Request.Params.num) elem.del();
+					});
+				}
+			}
 			
 			function WindowResized(){
 				ContentPanel.style.height = WS.Body.clientHeight + "px";
@@ -119,34 +127,34 @@
 		<canvas id='BackgroundCanvas'></canvas>
 		<div id='ContentPanel'>
 			
-			<div id='Robo0' class='robo env-obj'>
+			<div id='Robo0' num="0" class='env-obj'>
 
 			</div>
-			<div id='Robo1' class='robo env-obj'>
+			<div id='Robo1' num="1" class='robo'>
 
 			</div>
-			<div id='Robo2' class='robo env-obj'>
+			<div id='Robo2' num="2" class='robo'>
 
 			</div>
-			<div id='Robo3' class='robo env-obj'>
+			<div id='Robo3' num="3" class='robo'>
 
 			</div>
-			<div id='Robo4' class='robo env-obj'>
+			<div id='Robo4' num="4" class='robo'>
 
 			</div>
-			<div id='Robo5' class='robo env-obj'>
+			<div id='Robo5' num="5" class='robo'>
 
 			</div>
-			<div id='Robo6' class='robo env-obj'>
+			<div id='Robo6' num="6" class='robo'>
 
 			</div>			
-			<div id='Robo7' class='robo env-obj'>
+			<div id='Robo7' num="7" class='robo'>
 
 			</div>
-			<div id='Robo8' class='robo env-obj'>
+			<div id='Robo8' num="8" class='robo'>
 
 			</div>			
-			<div id='Robo9' class='robo env-obj'>
+			<div id='Robo9' num="9" class='robo'>
 
 			</div>
 			

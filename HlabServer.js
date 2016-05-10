@@ -7,16 +7,18 @@ var Net = require('net');
 require(Path.resolve("./ILAB/Modules/Utils.js"));
 var Files = require(Path.resolve("./ILAB/Modules/Files.js"));
 
+var XRouter = require(Path.resolve("./HLAB/hlabrouter.js"));
+
 HLabServer = function(config, router, logger){
 	try{
 		this.Config = config;
 		this.noCollectData = true;
 		this.logger = logger = console;
-		this.AvailableConfigs = {};
-		var clients = this.ConnectedPorts = {};
 		this.ConnectedClients = {}
 		var me = this;
 
+		XRouter = new XRouter(config, router, logger)
+		
 		var filesRouter = Files(config, this);
 		router.for("Main","/>", {
 			GET : function(context){
@@ -175,6 +177,29 @@ HLabServer = function(config, router, logger){
 				return false;
 			}
 		});
+		router.for("Main","/~devices>", {
+			GET : function(context){
+				if (context.completed) return true;
+				context.res.setHeader("Content-Type", "text/json; charset=utf-8");
+				context.finish(200, JSON.stringify(XRouter.getDevices()));
+			 	return true;
+			},
+			SEARCH : function(context){
+				if (context.completed) return true;
+				context.res.setHeader("Content-Type", "text/json; charset=utf-8");
+				context.finish(200, JSON.stringify(XRouter.getDevices()));
+			 	return true;
+			},
+			DELETE : function(context){
+				
+			},
+			POST : function(context){
+				
+			},
+			PUT : function(context){
+				
+			}
+		});
 		router.for("Main","/<", filesRouter);
 	}
 	catch(err){
@@ -190,6 +215,8 @@ HLabServer.prototype = {
 		var clients = this.ConnectedClients;
 		var me = this;
 
+		XRouter.Start();
+		
 		/*
 		var netServer = this.NetServer = Net.createServer(function(client) { //'connection' listener
 			try{
@@ -273,6 +300,7 @@ HLabServer.prototype = {
 
 	Stop : function(){			
 		this.logger.log("HLAB server stopping");
+		XRouter.Stop();
 		/*try{
 			r netClients = this.ConnectedPorts;
 			var clients = this.ConnectedClients;
@@ -299,56 +327,6 @@ HLabServer.prototype = {
 			this.logger.error("Error stopping HLAB server:");
 			this.logger.error(err);
 		}*/
-	},
-
-
-	NetClientConnected : function(cfg, client){
-		try{
-			var me = this;
-			if ((cfg + "").length != 9){
-				console.error("unknown config " + cfg);
-				//return;
-			}			
-			var cid = cfg;			
-			//var client = ;
-			client.on('data', function(data){
-				me.NetClientData(data, cid);
-			});
-			Channels.emit("/HLAB/XROUTER/" + cid + ".connected", cfg);
-			Channels.on("/HLAB/XROUTER/" + cid + ".out", function(msg, data){
-				client.send(data);
-			});
-			return cfg;
-			/*this.logger.log(cfg);
-			var res = { };
-			var sr = cfg.Serials;
-			for (var i = 0; i < sr.length; i++){
-				if (sr[i]) res[sr[i]] = null;
-			}
-			for (var i = 0; i < cfg.Configs.length; i++){
-				var line = cfg.Configs[i];
-				if (!res[line.PortName]) res[line.PortName] = line;
-				this.logger.log(line.PortName + " " + line.Speed + " " + line.RxPacketType);
-			}			 
-			this.AvailableConfigs[cid] = {ServerId : cfg.ServerId, Ports : res, Addr : client.remoteAddress + ":" + client.remotePort};
-			*/
-		}
-		catch(err){
-			this.logger.log("Unknown client: " + cid);
-			this.logger.error(err);
-		}
-	},
-
-	NetClientData : function(data, cid){
-		try{			
-			console.log(data);
-			//data = JSON.parse(data);
-			Channels.emit("/HLAB/XROUTER/" + cid + ".in", data);
-			Channels.emit("/HLAB/XROUTER/IN", data);
-		}
-		catch(err){
-			console.error(err);
-		}
 	}
 }
 
