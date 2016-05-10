@@ -1,0 +1,36 @@
+
+
+#PortsList{
+	
+}
+
+#PortsList .port{
+	font-family: monospace;
+	font-size: 16px;
+	border: solid 1px navy;
+	border-radius: 5px;
+	width: 150px;
+	overflow: hidden;
+	text-align: center;
+	padding: 5px;
+	margin: 3px;
+	white-space: nowrap;
+	display: inline-block;
+	height: 50px;
+	background-color: #ffc;
+	cursor: default;
+	color: #333;
+	box-sizing: border-box;
+}
+
+#PortsList .port:hover{
+	color: black;
+	padding-left: 4px;
+	padding-top: 4px;
+	border-width: 2px;
+}
+
+#PortsList .port .port-name{
+	font-size: 18px;
+	font-weight : bold;
+}

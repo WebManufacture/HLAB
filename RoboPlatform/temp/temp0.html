@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>        
+	<head>            
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<script src="http://services.web-manufacture.net/Base/v1.5?join=true" type="text/javascript"></script>
+		<link href="http://services.web-manufacture.net/Styles/System.default.css" rel="stylesheet">
+		<script src="http://klab.web-manufacture.net/HLAB/UartBase/UartManager.js" type="text/javascript"></script>
+		<title>test</title>  
+
+		<script language="JavaScript">
+
+			WS.DOMload(Init);		
+		
+			
+    		 function Init(){
+	
+				 proxy = new UartClient("ws://192.168.1.132:5000/COM3");
+				 proxy.on("received", function(data){
+					 for (var i = 0; i < data.length; i++){
+			arr.push(data.charCodeAt(i));
+		}
+					 TextOutput = String.fromCharCode(i);
+					 console.log(data);
+				 });
+				 //proxy.sendString("r");
+			 }
+			function Send(){
+				//alert("sss")
+				proxy.sendString(TextInput.value);
+			}
+
+		</script>
+
+		<style type='text/css'>
+			body{
+				padding: 20px;
+			}
+			
+			#TextInput{
+				position:absolute; 
+				 
+				height: 20px;
+				width: 100px;
+			}
+			#TextOutput{
+				position:absolute; 
+				top:80px; 
+				height: 500px;
+				width: 1000px;
+				background: rgb(231, 231, 231);
+			}
+
+		</style>  
+	</head>        
+	<body>
+		<include url='http://services.web-manufacture.net/UI/HTMLelements.htm'></include>	
+
+		<div class='btn-ira ok location' onclick='Send()'>отправить</div>
+		<input id="TextInput">
+		
+		<div id="TextOutput" style='overflow:auto'> </div>
+	</body>
+</html>
+

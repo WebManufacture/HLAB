@@ -1,45 +1,102 @@
 function RoboController4(robo){
+	
 	this.robo = robo;
-
-	robo.setText("В");
- 
-	this.mainVector = {};
+	
+	var direction = {
+		x : 1,
+		y : 0
+	};
+	
+	var action = {
+		direct : direction,
+		count : 0
+	};
+	
+	var actionQueue = [action];
+	
 	
 	this.onInterval = function(){
-		robo.goRight();
+		robo.setText("E");
+		var left  = robo.Sensor.left;
+		var right  = robo.Sensor.right;
+		var top  = robo.Sensor.top;
+		var bottom  = robo.Sensor.bottom;
+		var x = direction.x;
+		var y = direction.y;
+		
+		/**
+		 *	Coordinates of direction
+		 *	
+		 *		    (0, 1)
+		 *
+		 *	(-1,0)			(1,0)
+		 *
+		 *			(0,-1)
+		 *
+		 *
+		 *	why bottom isn't (0, -1) ??? 
+		 */
+		
 
-		if (!robo.isFree()){
-			if (robo.Sensor.left) this.mainVector.x = 3;
-			if (robo.Sensor.right) this.mainVector.x = -3;
-			if (robo.Sensor.top) this.mainVector.y = 3;
-			if (robo.Sensor.bottom) this.mainVector.y = -3;
-			//robo.setText(this.mainVector.x + "" + this.mainVector.y);			
-		}
-
-
-		if (robo.Sensor.top){
-			robo.goDown();
-			robo.setText("↓");
- 		}
-		else if (robo.Sensor.right){
-			if (robo.X > 450){
-				robo.goUp() ;			
-				robo.setText("→");
+		if ((x ==  1 && y ==  0 && right  != 0) ||
+		   	(x == -1 && y ==  0 && left   != 0) ||
+			(x ==  0 && y ==  1 && bottom != 0) ||
+			(x ==  0 && y == -1 && top    != 0) ||
+		   	(x ==  1 && y ==  1 && ((right != 0) || (bottom != 0))) ||
+		   	(x ==  1 && y == -1 && ((right != 0) || (top    != 0))) ||
+		   	(x == -1 && y ==  1 && ((left  != 0) || (bottom != 0))) ||
+			(x == -1 && y == -1 && ((left  != 0) || (top    != 0))) ||
+			(x ==  0 && y ==  0))
+		{		
+			direction = {
+				x : parseInt(1 - Math.random() * 4) + 1,
+				y : parseInt(1 - Math.random() * 4) + 1	
 			}
-			else{
-				robo.goDown();			
-				robo.setText("↓");
-			}			
 			
+			action = {
+				direct : direction,
+				count : 0
+			};
+			
+			actionQueue.push(action);
+	
+			console.log("direction ==> x: " + direction.x + " y: " + direction.y);		
+			
+			var tmpActionQueue = actionQueue[action.length - 1];
+			var tmpDirect = tmpActionQueue.direct;											// wtf?? Error msq ==> TypeError: Cannot 
+			var tmpCount = tmpActionQueue.count;											// read property 'direct' of undefined.
+			
+			console.log("actionQueue ==> direct: x == " + tmpDirect.x + " y == " + 
+						tmpDirect.y + " count: " + tmpCount);
 		}
-		else if (robo.Sensor.bottom){
-			robo.goUp() ;			
-			robo.setText("↑");
-		}
-		else {
+		
+		robo.goVector(direction.x, direction.y);
+		
+		actionQueue.count = actionQueue.count + 1; 
+		
+		/*
+		
+		// алгорит робота не лоха. 
+		// но не без изъян
+		
+		if (right == 0){
 			robo.goRight();			
-			robo.setText("→");
+		}else{
+			if (bottom == 0){
+				robo.goDown();
+			}else{
+				if (top == 0){
+					robo.goUp();
+				}else{
+					if (right == 0){
+						robo.goRight();
+					}	
+				}
+			}
 		}
+		
+		*/
+		
 /*
 8592 — ←
 8593 — ↑
@@ -74,6 +131,7 @@ function RoboController4(robo){
 
 	}	
 }
+
 
 RoboController4.prototype = {
 

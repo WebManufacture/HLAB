@@ -1,16 +1,15 @@
-
-function loadInt(arr, index)
-{
-	return (int)(arr[index] * 16777216 + arr[index + 1] * 65536 + arr[index + 2] * 256 + arr[index + 3]);
-}
-
 function saveInt(arr, index, value)
 {
-	arr[index] = (byte)(value >> 24);
-	arr[index + 1] = (byte)(value >> 16);
-	arr[index + 2] = (byte)(value >> 8);
-	arr[index + 3] = (byte)(value);
-	return value;
+	arr[index] =  (value >> 24);
+	arr[index + 1] = (value >> 16);
+	arr[index + 2] = (value >> 8);
+	arr[index + 3] = (value);
+	return Math.round(value);
+}
+
+function loadValue(arr, index)
+{
+	return Math.round(arr[index] * 16777216 + arr[index + 1] * 65536 + arr[index + 2] * 256 + arr[index + 3]);
 }
 
 MotorPacket = function(command, address){
@@ -27,18 +26,18 @@ MotorPacket = function(command, address){
 
 MotorPacket.FromBuffer = function(data){
 	if (data == null) return null;
-	if (data.Length >= 32)
+	if (data.length >= 32)
 	{
 		var obj = new MotorPacket(data[0]);
-		obj.date = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.") + DateTime.Now.Millisecond;
+		obj.date = new Date();
 		obj.state = data[1];
-		obj.line = loadInt(data, 2);
-		obj.x = loadInt(data, 6);
-		obj.y = loadInt(data, 10);
-		obj.z = loadInt(data, 14);
-		obj.xLimit = loadInt(data, 18);
-		obj.yLimit = loadInt(data, 22);
-		obj.zLimit = loadInt(data, 26);
+		obj.line = loadValue(data, 2);
+		obj.x = loadValue(data, 6);
+		obj.y = loadValue(data, 10);
+		obj.z = loadValue(data, 14);
+		obj.xLimit = loadValue(data, 18);
+		obj.yLimit = loadValue(data, 22);
+		obj.zLimit = loadValue(data, 26);
 		obj.stateA = data[30];
 		obj.stateB = data[31];
 		return obj;
@@ -49,12 +48,13 @@ MotorPacket.FromBuffer = function(data){
 MotorPacket.prototype.serialize = function(){
 	var bytes = [];
 	bytes[0] = this.command;
-	bytes[1] = (this.speed / 256);
-	bytes[2] = (this.speed % 256);
+	bytes[1] = Math.floor(this.speed / 256);
+	bytes[2] = Math.round(this.speed - bytes[1]*256);
 	saveInt(bytes, 3, this.line);
 	saveInt(bytes, 7, this.x);
 	saveInt(bytes, 11, this.y);
 	saveInt(bytes, 15, this.z);
+	if (this.address) bytes.unshift(this.address);
 	return bytes;
 }
 
@@ -65,7 +65,7 @@ global.Commands = global.CommandType =
     Rebase: 2,
     Stop: 3,
     State: 0,
-	Move: 5,
+    Move: 5,
     Pause: 6,
     Resume: 7,
     Error: 16
@@ -223,3 +223,6 @@ CncProgram.prototype =
         return false;
     },
 }
+
+module.exports = CncProgram
+

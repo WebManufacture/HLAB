@@ -4,6 +4,8 @@ WS.DOMload(function(){
 	var robos = [];
 	var roboDivs = DOM.all(".robo");
 
+	var cicle = 0;
+	
 	var roboW = Robo0.offsetWidth;
 	var roboH = Robo0.offsetHeight;
 
@@ -18,21 +20,52 @@ WS.DOMload(function(){
 			return ContentPanel.offsetHeight - roboH;
 		}
 	});
+	
+	function createMessageFunc(robo){
+		return function(msg){
+			if (robo._leftIntersect){
+				console.log(cicle + ":" + robo._num + "-->" + robo._leftIntersect._num + ": " + msg);
+				robo._leftIntersect._receiveMessage(msg, robo._num, cicle);
+			}
+			if (robo._rightIntersect){
+				console.log(cicle + ":" + robo._num + "-->" + robo._rightIntersect._num + ": " + msg);
+				robo._rightIntersect._receiveMessage(msg, robo._num, cicle);
+			}
+			if (robo._topIntersect){
+				console.log(cicle + ":" + robo._num + "-->" + robo._topIntersect._num + ": " + msg);
+				robo._topIntersect._receiveMessage(msg, robo._num, cicle);
+			}
+			if (robo._bottomIntersect){
+				console.log(cicle + ":" + robo._num + "-->" + robo._bottomIntersect._num + ": " + msg);
+				robo._bottomIntersect._receiveMessage(msg, robo._num, cicle);
+			}
+		}
+	}
 
 	function checkIntersections(roboDiv){
 		roboDiv._sense.leftValue = null;
 		roboDiv._sense.rightValue = null;
 		roboDiv._sense.topValue = null;
 		roboDiv._sense.bottomValue = null;
+		roboDiv._radar.left = null;
+		roboDiv._radar.right = null;
+		roboDiv._radar.top = null;
+		roboDiv._radar.bottom = null;
+		roboDiv._leftIntersect = null;
+		roboDiv._rightIntersect = null;
+		roboDiv._topIntersect = null;
+		roboDiv._bottomIntersect = null;
 		var hasIntersect = false;
 		for (var i = 0; i < roboDivs.length; i++){
 			var crobo = roboDivs[i];
 			if (crobo != roboDiv){
-				if (Math.abs(crobo._x - roboDiv._x) <= roboW && Math.abs(crobo._y - roboDiv._y) <= roboH && !(Math.abs(crobo._x - roboDiv._x) == roboW && Math.abs(crobo._y - roboDiv._y) == roboH)){
+				if (Math.abs(crobo._x - roboDiv._x) <= roboW && Math.abs(crobo._y - roboDiv._y) <= roboH){
 					hasIntersect = true;
 					if (Math.abs(crobo._x - roboDiv._x) == roboW){
 						if (crobo._x < roboDiv._x){
-							roboDiv._sense.leftValue = roboDiv._y - crobo._y;														
+							roboDiv._sense.leftValue = roboDiv._y - crobo._y;	
+							roboDiv._radar.left = crobo._type;
+							roboDiv._leftIntersect = crobo;
 							//А как отличить реальное отличие на 1 и нереальное ? :)
 							/*if (roboDiv._sense.left == 0) {
 								roboDiv._sense.left = 1;
@@ -40,14 +73,20 @@ WS.DOMload(function(){
 						}
 						else{
 							roboDiv._sense.rightValue = roboDiv._y - crobo._y;
+							roboDiv._radar.right = crobo._type;
+							roboDiv._rightIntersect = crobo;
 						}
 					}
 					if (Math.abs(crobo._y - roboDiv._y) == roboH){
 						if (crobo._y < roboDiv._y){
 							roboDiv._sense.topValue = roboDiv._x - crobo._x;
+							roboDiv._radar.top = crobo._type;
+							roboDiv._topIntersect = crobo;
 						}
 						else{
 							roboDiv._sense.bottomValue = roboDiv._x - crobo._x; 
+							roboDiv._radar.bottom = crobo._type;
+							roboDiv._bottomIntersect = crobo;
 						}
 					}
 				}
@@ -55,19 +94,21 @@ WS.DOMload(function(){
 		}
 		if (roboDiv._x <= 0) {
 			roboDiv._sense.leftValue = 100;
-			hasIntersect = true;
+			roboDiv._radar.left = "wall";
 		}
 		if (roboDiv._y <= 0) {
 			roboDiv._sense.topValue = 100;
-			hasIntersect = true;
+			roboDiv._radar.top = "wall";
 		}
 		if (roboDiv._x >= maxX) {
 			roboDiv._sense.rightValue = 100;
-			hasIntersect = true;
+			roboDiv._radar.right = "wall";
+			Stop();
+			alert(roboDiv.get("@num") + " WIN!");
 		}
 		if (roboDiv._y >= maxY) {
 			roboDiv._sense.bottomValue = 100;
-			hasIntersect = true;
+			roboDiv._radar.bottom = "wall";
 		}
 
 		if (roboDiv._sense.left) {
@@ -109,34 +150,51 @@ WS.DOMload(function(){
 		food.style.top = y + "px";
 	}
 
-	function placeRobot(roboDiv){
+	function placeRobot(roboDiv, count){
 		setTimeout(function(){
-			var x = Math.random() * maxX;
-			var y = Math.random() * maxY;
-			roboDiv.StartStep();
-			roboDiv.SetCoord(x, y);
+			if (count < 5) count = 5;
+			var pos = parseInt(Math.random() * (count));
+			roboDiv._setCoordInternal(0, (roboH + 2) * pos);
 			if (checkIntersections(roboDiv)){
-				placeRobot(roboDiv);
+				placeRobot(roboDiv, count);
 			}
 		}, 100);
 	}
+	
+	function placeFake(roboDiv){
+		setTimeout(function(){
+			var x = Math.random() * maxX;
+			var y = Math.random() * maxY;
+			roboDiv._setCoordInternal(x, y);
+			if (checkIntersections(roboDiv) || x < 50){
+				placeFake(roboDiv);
+			}
+		}, 100);
+	}
+	
 	var clength = roboDivs.length; 
 
 	for (var i = 0; i < clength; i++){
 		var roboDiv = roboDivs[i];
+		roboDiv._num = roboDiv.get("@num");
 		var robo = robos[i] = new Robo(roboDiv);
-		roboDiv.textContent = i;
-		roboDiv.StartStep();
+		roboDiv._sendMessage = createMessageFunc(roboDiv, robo)
+		roboDiv._type = "live"
+		robo._type = "live";
+		roboDiv.text(roboDiv._num);
 		//roboDiv.SetCoord(0, roboH * i + 1);
-		roboDiv.SetCoord(0, roboH * i + 1);
+		placeRobot(roboDiv, clength)
 	};
 
 	for (var i = clength; i < 30; i++){
 		var roboDiv = ContentPanel.div(".robo.standart");
+		roboDiv._num = i;
 		var robo = robos[i] = new Robo(roboDiv);
 		robo.standart = true;
+		roboDiv._type = "bug"
+		robo._type = "bug"
 		roboDiv.textContent = i;
-		placeRobot(roboDiv);
+		placeFake(roboDiv);
 	}
 
 	roboDivs = DOM.all(".robo");
@@ -165,11 +223,11 @@ WS.DOMload(function(){
 	});
 	for (var i = 0; i < robos.length; i++){
 		robos[i].saveState();		
-		var src = "Robo" + (i) + ".js";
+		var src = "Robo" + robos[i].Num + ".js";
 		if (robos[i].standart) src = "Robo0.js"
 		Net.get(src, null, wFall.addClosure(function(result){
 			scripts[this.index] = result;
-		}, {index : i}));
+		}, {index: i}));
 		/*var iFrame = document.createElement('iframe');
 		DOM.add(iFrame);
 		var fHead = iFrame.contentDocument.head;
@@ -181,6 +239,7 @@ WS.DOMload(function(){
 	}
 
 	function ProcessTick(){
+		cicle++;
 		for (var i = 0; i < controllers.length; i++){
 			var controller = controllers[i];
 			if (controller && typeof controller.onInterval == 'function'){
@@ -192,12 +251,12 @@ WS.DOMload(function(){
 				catch(e){
 					console.log(e);
 				}
+				roboDivs[i].FinishStep();
 			}
 		}				
 	}	
 
 	var timeout = 10;
-
 	var interval = null; 
 
 	Init = function(){
@@ -213,6 +272,7 @@ WS.DOMload(function(){
 		/*for (var i = 0; i < robos.length; i++){
 			robos[i].restoreState();
 		}*/
+		cicle = 0;
 		interval = setInterval(ProcessTick, timeout);
 	};
 

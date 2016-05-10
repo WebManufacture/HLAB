@@ -104,6 +104,14 @@ Inherit(UartClient, Eventer, {
 		this.socket.send(JSON.stringify(data));
 	},
 	
+	sendString : function(data){
+		var arr = [];
+		for (var i = 0; i < data.length; i++){
+			arr.push(data.charCodeAt(i));
+		}
+		this.socket.send(JSON.stringify(arr));
+	},
+	
 	
 	close : function(){
 		if (this.socket){

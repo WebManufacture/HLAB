@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>RoboPlatform - USB devices list</title>
+	<script src="http://services.web-manufacture.net/Base/v1.5?join=true"></script>
+	<link href="http://services.web-manufacture.net/Styles/System.default.css" rel="stylesheet">
+    <script src="./communication/serial.js"></script>
+	<script src="./UI/router.js"></script>
+	<script src="./UI/configuration.js"></script>
+	<link href="./UI/main.css" rel="stylesheet">
+</head>
+<body>
+	<include url='http://services.web-manufacture.net/ui/toolbars.htm'></include>
+	<include url='http://services.web-manufacture.net/ui/LoadingPanel.htm'></include>
+	<div id='ToolBar' class='header toolbar'></div>
+    <div id="PortsList">
+	
+    </div>
+	<script>
+		ui.onload(function(){
+			LoadingPanel = ui.create("ui.LoadingPanel", "Loading...");
+			LoadingPanel.show();
+			Config.load(function(config){
+				Serial.getDevices(function(ports){
+					for (var port in ports){
+						port = ports[port];
+						var portDiv = PortsList.div(".port");
+						portDiv.div(".port-name", port.port);
+						portDiv.div(".vendor", port.vendor);
+						portDiv.onclick = function(){
+							Router.OpenPort(port);
+						}
+					};
+					LoadingPanel.hide();
+				});
+			});
+		});
+		
+	</script>
+</body>
+</html>

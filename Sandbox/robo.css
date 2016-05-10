@@ -21,3 +21,88 @@
 .moving-btn:active{
 	background: #Fc0;
 }
+
+
+
+#HeaderBar{
+	z-index: 300;
+}
+			
+#ContentPanel{
+	position:relative;
+	width: 100%;
+	z-index: 200;
+}
+			
+#BackgroundCanvas{
+	position: absolute;
+	background-color: black;
+	z-index: 0;
+}
+			
+.robo, #Robo0{
+	-moz-box-sizing: border-box;
+	/*background: no-repeat no-scroll 0 0 #FFFFFF;*/
+	/*background-color: white;*/
+	border: 1px solid #000000;
+	/*color: black;*/
+	font-size: 40px;
+	height: 50px;
+	width: 50px;
+	position: absolute;
+	text-align: center;
+	z-index: 100;
+			}
+/*Препятствия*/
+.robo.standart{
+	background-image:url("https://cdn3.iconfinder.com/data/icons/wpzoom-developer-icon-set/500/57-64.png");
+	background-color: white;
+	color: red;
+	font-size: 40px;
+	height: 50px;
+	width: 50px;
+	background-position: center;
+				
+}
+			
+			
+.food{
+	-moz-box-sizing: border-box;
+	background: no-repeat no-scroll 0 0 #FFFFFF;
+	background-color: green;
+	border: 1px solid #000000;
+	color: black;
+	font-size: 50px;
+	height: 20px;
+	width: 20px;
+	position: absolute;
+	text-align: center;	
+	z-index: 90;
+}
+			
+			
+			
+			iframe{
+				display: none;
+			}
+			
+			#Robo9{
+				background-color: #FF9090;
+				font-size: 30px;
+				height: 35px;
+				width: 35px;
+				color: black;
+				position: absolute;
+				
+			}
+			
+			#Robo1,#Robo2,#Robo3,#Robo4,#Robo5,#Robo6,#Robo7,#Robo8{
+				background-color: #AFA;
+				font-size: 30px;
+				height: 35px;
+				width: 35px;
+				color: black;
+				position: absolute;
+				
+			}
+			

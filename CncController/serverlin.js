@@ -1,85 +1,58 @@
 var Url = require('url');
 var fs = require('fs');
 var Path = require('path');
-ObjectID = require('mongodb').ObjectID;
-var edge = require('edge');
 
-require(Path.resolve("./ILAB/Modules/Utils.js"));
-require(Path.resolve("./ILAB/Modules/Channels.js"));
-require(Path.resolve('./ILAB/Modules/Logger.js'));
-var fileSystem = require(Path.resolve('./ILAB/Modules/Files.js'));
-require(Path.resolve('./ILAB/Modules/Mongo.js'));
-//var UartUsb = require(Path.resolve('./HLAB/Modules/Uart.js'));
-require(Path.resolve('./HLAB/Modules/UartTcp.js'));
+var WebSocketServer = new require('ws');
+var webSocketServer = new WebSocketServer.Server({
+  port: 6500
+});
+webSocketServer.on('connection', function(ws) {
+
+  var id = Math.random();
+  clients[id] = ws;
+  console.log("новое соединение " + id);
+
+  ws.on('message', function(message) {
+    console.log('получено сообщение ' + message);
+
+    for (var key in clients) {
+      clients[key].send(message);
+    }
+  });
+
+  ws.on('close', function() {
+    console.log('соединение закрыто ' + id);
+    delete clients[id];
+  });
+
+});
+
+
+
+var uart = require(Path.resolve('Uart.js'));
+var cnc = require(Path.resolve('cnc.js'));
 //require(Path.resolve('./HLAB/Modules/UartUsb.js'));
 
-Server = server = {};
-
-require(Path.resolve('./HLAB/CncController/cnc.js'));
-
-Server.InitDB = function (){
-	debug("connecting DB");
-	if (Server.Config.DB){
-		if (!Server.Config.DbHost) Server.Config.DbHost = "127.0.0.1";
-		if (!Server.Config.DbPort) Server.Config.DbPort = 20000;
-		replicaSet([{host: Server.Config.DbHost, port : Server.Config.DbPort}], Server.Config.DB, function(err, database){
-			if (err){
-				error(err);	
-			}
-			global.db = database;
-		});
+var TTY_NAME = process.argv[2];
+console.log("Connecting--- " + TTY_NAME);
+try{
+var port = uart.open(TTY_NAME, function(data){
+	try{
+		var obj = MotorPacket.FromBuffer(data);
+		console.log(obj);
 	}
-};
+	catch(e){
+		console.error(e);
+	}
+});
 
-Uart = {};
+var packet = new MotorPacket(5, 06);
+packet.y = 1500;
+packet.speed = 2200;
 
-Uart.Command = function(packet){
-	Channels.emit("uart.output", packet.serialize());
-	return packet;
-};
-
-Uart.SimpleCommand = function(command){
-	command = new MotorPacket(command);
-	Channels.emit("uart.output", command.serialize());
-	return command;
-};
-
-Server.Init = function(config, router){
-	Server.Config = config;
-	Server.Device = config.DeviceCfg;
-	//Server.InitDB();
-	Uart.client = new UartTCP("uart", Server.Device);
-	router.for("Main", "/storage/>", new fileSystem({basepath: "storage"}));
-	router.for("Main", "/cnc/>", new fileSystem({basepath: "storage/cnc"}));
-	router.for("Main", "/configs/>", new fileSystem({basepath: "storage/configs"}));
-	router.for("Main", "/state/>", function(context){ 
-		Uart.SimpleCommand(Commands.State);
-		context.finish(200, result);
-		return true;
-	});	
-	router.for("Main", "/program/>", function(context){ 
-		console.log(context.data);
-		var data = JSON.parse(context.data);
-		if (Server.program){
-			Server.program.close();	
-		}
-		Server.program = new CncProgram(data, Uart);
-		Server.program.Start();
-		context.finish(200, data.length);
-		return true;
-	});		
-	router.for("Main", "/command/>", function(context){ 
-		var data = JSON.parse(context.data);
-		console.log(data);
-		if (data.command == Commands.Stop && Server.program){
-			console.log(Stopping);
-			Server.program.Stop();
-		}
-		Uart.Command(data)
-		context.finish(200, data);
-		return true;
-	});
-};
-
-module.exports = Server;
-
+//port(packet.serialize());
+}
+catch(Err){
+   console.error(Err);
+}
+setTimeout(function(){port.close(); io.close();}, 200000); 
