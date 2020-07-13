@@ -17,16 +17,11 @@ function SerialService(params){
     var self = this;
     this.ports = {};
     this.ListPorts = function () {
-        return new Promise(function(resolve, reject){
-            SerialPort.list(function (err, list) {
-                if (err) reject(err);
-                else resolve(list)
-            });
-        });
+        return SerialPort.list();
     };
     this.once("exiting", () => {
         for (var port in self.ports){
-            self.ports[portName].close();
+            self.ports[port].close();
         }
     })
     this.Identify = function(vid, pid){
@@ -53,6 +48,15 @@ function SerialService(params){
                 self.emit("serial-opened-" + portName);
             });
             port.on("data", function (data) {
+                if (options.usePackets){
+                    data = new Buffer(data.slice(2, data.length - 1));
+                }
+                if (options.logAscii){
+                    console.log(data.toString("ascii"));
+                }
+                if (options.log){
+                    console.log(data);
+                }
                 self.emit("serial-string", portName, data.toString("ascii"));
                 self.emit("serial-string-" + portName, data.toString("ascii"));
                 data = Array.from(data);
@@ -75,7 +79,6 @@ function SerialService(params){
                     reject(err);
                     return false;
                 }
-
                 console.log("Serial opened: " + portName);
                 self.ports[portName] = port;
                 resolve(portName);
@@ -182,6 +185,11 @@ function SerialService(params){
             }
         });
     };
+    if (params.ports){
+        params.ports.forEach((item)=>{
+            this.OpenPort(item.name, item.options);
+        });
+    }
     return Service.call(this, params);
 }
 
